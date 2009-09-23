@@ -266,17 +266,15 @@ End If
 ii=1
 ij=1
 Do li=1,arrsize(1,2)
+  ii(1)=li
   Do lj=1,arrsize(2,2)
+    ii(2)=lj  
     Do lk=1,arrsize(3,2)
+      ii(3)=lk
       Do ll=1,arrsize(4,2)
-        ii(1)=li
-        ii(2)=lj
-        ii(3)=lk
         ii(4)=ll
       
-        Do i=1,maxdim
-          ij(i)=ii(duminx(i))
-        End Do
+        ij(1:maxdim)=ii(duminx(1:maxdim))
       
         arrdata(ii(1),ii(2),ii(3),ii(4))=dumarr(ij(1),ij(2),ij(3),ij(4))
       End Do
