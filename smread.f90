@@ -261,7 +261,7 @@ if (nf_inq_varid(ncid,'ocndepth',varid).EQ.nf_noerr) then
   varname=(/ 'ocndepth', 'm' /)
   call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,46),arrsize)
   write(6,*) "Reading tgg,sal,uoc,voc"
-  coverout(1:arrsize(1,2),:,46:51)=coverout(1:arrsize(1,2),:,7:12)
+  coverout(1:arrsize(1,2),:,47:52)=coverout(1:arrsize(1,2),:,7:12)
   do i=7,wlev
     write(chr,'(I2.2)') i
     varname(1)='tgg'//chr
