@@ -1,38 +1,38 @@
 FF = ifort
-XFLAGS = -O3 -Qipo -QaxSSSE3,SSE3 /arch:IA32 /Gm /static
-LIBS = netcdf.lib
-LDFLAGS = /link netcdf.lib /stack:99999999
+XFLAGS = -O
+LIBS = -lnetcdf
+LDFLAGS = 
 
-OBJT = smclim.obj smread.obj setxyz_m.obj ccinterp.obj readswitch.obj jimcc_m.obj \
-       latltoij_m.obj ncwrite.obj ncread.obj xyzinfo_m.obj newmpar_m.obj \
-       indices_m.obj parm_m.obj precis_m.obj ind_m.obj jimco_m.obj jim_utils.obj \
-       nfft_m.obj misc.obj
+OBJT = smclim.o smread.o setxyz_m.o ccinterp.o readswitch.o jimcc_m.o \
+       latltoij_m.o ncwrite.o ncread.o xyzinfo_m.o newmpar_m.o \
+       indices_m.o parm_m.o precis_m.o ind_m.o jimco_m.o jim_utils.o \
+       nfft_m.o misc.o
 
 smclim :$(OBJT)
-	$(FF) $(XFLAGS) $(OBJT) $(LDFLAGS) -out:smclim.exe
+	$(FF) $(XFLAGS) $(OBJT) $(LDFLAGS) -o smclim
 
 clean:
-	del *.obj core *.mod *.exe
+	rm *.o core *.mod 
 # This section gives the rules for building object modules.
 
 .SUFFIXES:.f90
-.f90.obj:
+.f90.o:
 	$(FF) -c $(XFLAGS) $<
-.f.obj:
+.f.o:
 	$(FF) -c $(XFLAGS) $<
 
-smclim.obj : ccinterp.obj
-smread.obj : ccinterp.obj
-ccinterp.obj : ccinterp.f90 setxyz_m.obj xyzinfo_m.obj latltoij_m.obj newmpar_m.obj
-latltoij_m.obj : latltoij_m.f90 xyzinfo_m.obj newmpar_m.obj
-setxyz_m.obj : setxyz_m.f90 newmpar_m.obj indices_m.obj parm_m.obj precis_m.obj ind_m.obj xyzinfo_m.obj jimco_m.obj jimcc_m.obj 
-xyzinfo_m.obj : xyzinfo_m.f90 precis_m.obj
-newmpar_m.obj : newmpar_m.f90 
-precis_m.obj : precis_m.f90
-indices_m.obj : indices_m.f90
-parm_m.obj : parm_m.f90 precis_m.obj 
-ind_m.obj : ind_m.f90 newmpar_m.obj 
-jimcc_m.obj : jimcc_m.f90 parm_m.obj precis_m.obj 
-jimco_m.obj : jimco_m.f90 precis_m.obj jim_utils.obj nfft_m.obj 
-jim_utils.obj : jim_utils.f90 precis_m.obj 
-nfft_m.obj : nfft_m.f90 precis_m.obj 
+smclim.o : ccinterp.o
+smread.o : ccinterp.o
+ccinterp.o : ccinterp.f90 setxyz_m.o xyzinfo_m.o latltoij_m.o newmpar_m.o
+latltoij_m.o : latltoij_m.f90 xyzinfo_m.o newmpar_m.o
+setxyz_m.o : setxyz_m.f90 newmpar_m.o indices_m.o parm_m.o precis_m.o ind_m.o xyzinfo_m.o jimco_m.o jimcc_m.o 
+xyzinfo_m.o : xyzinfo_m.f90 precis_m.o
+newmpar_m.o : newmpar_m.f90 
+precis_m.o : precis_m.f90
+indices_m.o : indices_m.f90
+parm_m.o : parm_m.f90 precis_m.o 
+ind_m.o : ind_m.f90 newmpar_m.o 
+jimcc_m.o : jimcc_m.f90 parm_m.o precis_m.o 
+jimco_m.o : jimco_m.f90 precis_m.o jim_utils.o nfft_m.o 
+jim_utils.o : jim_utils.f90 precis_m.o 
+nfft_m.o : nfft_m.f90 precis_m.o 

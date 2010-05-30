@@ -286,7 +286,7 @@ ncstatus=nf_close(ncid)
 
 Do ilon=1,ncsize(1)
   Do ilat=1,ncsize(2)
-    If (any((coverout(ilon,ilat,1:6).GT.2).OR.(coverout(ilon,ilat,1:6).lt.0.))) coverout(ilon,ilat,1)=0.
+    If (any((coverout(ilon,ilat,1:6).GT.2).OR.(coverout(ilon,ilat,1:6).lt.-2.))) coverout(ilon,ilat,1)=0.
     If (any((coverout(ilon,ilat,7:12).GT.350.).OR.(coverout(ilon,ilat,7:12).LT.250.))) coverout(ilon,ilat,1)=0.
     If (any((coverout(ilon,ilat,44:45).lt.0.))) coverout(ilon,ilat,44)=0.
     if (any((coverout(ilon,ilat,47:46+wlev).lt.250.).or.(coverout(ilon,ilat,47:46+wlev).gt.350.))) coverout(ilon,ilat,46)=0.
@@ -306,7 +306,7 @@ Do ilat=1,ncsize(2)
   aglat=smlonlat(2,1)+real(ilat-1)*(smlonlat(2,2)-smlonlat(2,1))/(smlonlat(2,3)-1.)
   Do ilon=1,ncsize(1)
 
-    If ((coverout(ilon,ilat,1).GT.0.).or.(coverout(ilon,ilat,43).GT.0.)) then
+    If ((coverout(ilon,ilat,1).ne.0.).or.(coverout(ilon,ilat,43).ne.0.)) then
 
       aglon=smlonlat(1,1)+real(ilon-1)*(smlonlat(1,2)-smlonlat(1,1))/(smlonlat(1,3)-1.)
 
@@ -316,8 +316,8 @@ Do ilat=1,ncsize(2)
       lcj = lcj+nface*ccdim(1)
   
       dataout(lci,lcj,1:45)=dataout(lci,lcj,1:45)+coverout(ilon,ilat,1:45)
-      if (coverout(ilon,ilat,1).GT.0.) countn(lci,lcj)=countn(lci,lcj)+1
-      if (coverout(ilon,ilat,44).GT.0.) countm(lci,lcj)=countm(lci,lcj)+1
+      if (coverout(ilon,ilat,1).ne.0.) countn(lci,lcj)=countn(lci,lcj)+1
+      if (coverout(ilon,ilat,44).ne.0.) countm(lci,lcj)=countm(lci,lcj)+1
     End if
     
   End Do
@@ -359,7 +359,7 @@ If (any(countn.LT.1).or.any(countm.lt.1).or.any(counto.lt.1)) then
       i=nint(serlon)
       j=nint(serlat)
 
-      if (countn(lci,lcj).eq.0.and.coverout(i,j,1).gt.0.) then
+      if (countn(lci,lcj).eq.0.and.coverout(i,j,1).ne.0.) then
         dataout(lci,lcj,1:43)=coverout(i,j,1:43)
         countn(lci,lcj)=1
       end if
@@ -369,7 +369,7 @@ If (any(countn.LT.1).or.any(countm.lt.1).or.any(counto.lt.1)) then
         countm(lci,lcj)=1
       end if
         
-      if (counto(lci,lcj).eq.0.and.coverout(i,j,46).gt.0.) then
+      if (counto(lci,lcj).eq.0.and.coverout(i,j,46).ne.0.) then
         dataout(lci,lcj,46:46+4*wlev)=coverout(i,j,46:46+4*wlev)
         counto(lci,lcj)=1
       end if
@@ -390,7 +390,7 @@ Deallocate(coverout)
 If (Any(countn.LT.1)) then
   Write(6,*) "Use near nbr for land"
   allocate(sermask(ccdim(1),ccdim(2)))
-  sermask(:,:)=(countn(:,:).GT.0).AND.(dataout(:,:,1).GT.0.)
+  sermask(:,:)=(countn(:,:).GT.0).AND.(dataout(:,:,1).ne.0.)
   If (.NOT.any(sermask)) Then
     Write(6,*) "ERROR: Cannot find valid soil data"
     Stop
@@ -416,7 +416,7 @@ End if
 If (Any(counto.LT.1)) then
   Write(6,*) "Use near nbr for water"
   allocate(sermask(ccdim(1),ccdim(2)))
-  sermask(:,:)=(counto(:,:).GT.0).AND.(dataout(:,:,46).GT.0.)
+  sermask(:,:)=(counto(:,:).GT.0).AND.(dataout(:,:,46).ne.0.)
   If (.NOT.any(sermask)) Then
     Write(6,*) "WARN: Cannot find valid ocean data"
     dataout(:,:,46)=0.
@@ -458,14 +458,14 @@ Do k=46,46+4*wlev
 End do
 
 do k=1,6
-  where(dataout(:,:,46).gt.0.) ! water
+  where(dataout(:,:,46).ne.0.) ! water
     dataout(:,:,6+k)=dataout(:,:,46+k)
   end where
 end do
 
 do lcj=1,ccdim(2)
   do lci=1,ccdim(1)
-    if (dataout(lci,lcj,46).gt.0.) then
+    if (dataout(lci,lcj,46).ne.0.) then
       ! rotate current to CC coordinates
       zonx=                     -polenz*xyz(lci,lcj,2)
       zony=polenz*xyz(lci,lcj,1)-polenx*xyz(lci,lcj,3)

@@ -98,7 +98,7 @@ Implicit None
 
 Integer, intent(in) :: nopts
 Integer, dimension(1:2) :: ccdim
-integer, parameter :: wlev = 10
+integer, parameter :: wlev = 20
 Character(len=*), dimension(nopts,2), intent(in) :: options
 Character*80 climfile,outfile,topofile,bintmp,returnoption
 Character*9 formout
@@ -321,22 +321,22 @@ end if
 ncstatus=nf_enddef(ncidarr(0))
 
 Write(6,*) "Replacing wetfrac1/2/3/4/5/6"
-outdatab=max(0.,min(outdata(:,:,1),2.))
+outdatab=max(-2.,min(outdata(:,:,1),2.))
 Call ncfindvarid(ncidarr(0),"wetfrac1",outname,varid) ! top
 Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-outdatab=max(0.,min(outdata(:,:,2),2.))
+outdatab=max(-2.,min(outdata(:,:,2),2.))
 Call ncfindvarid(ncidarr(0),"wetfrac2",outname,varid) ! top
 Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-outdatab=max(0.,min(outdata(:,:,3),2.))
+outdatab=max(-2.,min(outdata(:,:,3),2.))
 Call ncfindvarid(ncidarr(0),"wetfrac3",outname,varid) ! top
 Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-outdatab=max(0.,min(outdata(:,:,4),2.))
+outdatab=max(-2.,min(outdata(:,:,4),2.))
 Call ncfindvarid(ncidarr(0),"wetfrac4",outname,varid) ! bottom
 Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-outdatab=max(0.,min(outdata(:,:,5),2.))
+outdatab=max(-2.,min(outdata(:,:,5),2.))
 Call ncfindvarid(ncidarr(0),"wetfrac5",outname,varid) ! bottom
 Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-outdatab=max(0.,min(outdata(:,:,6),2.))
+outdatab=max(-2.,min(outdata(:,:,6),2.))
 Call ncfindvarid(ncidarr(0),"wetfrac6",outname,varid) ! bottom
 Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
 
