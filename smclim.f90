@@ -9,7 +9,7 @@ Integer :: nopts
 Character*80, dimension(:,:), allocatable :: options
 
 Write(6,*) 'SMCLIM - interpolate/bin climatology soil moisture/temperature on'
-Write(6,*) '         conformal-cubic grid (SEP-09)'
+Write(6,*) '         conformal-cubic grid (AUG-10)'
 
 ! Read switches
 nopts=3
@@ -120,7 +120,7 @@ Write(6,*) "lon0,lat0 : ",lonlat
 Write(6,*) "Schmidt   : ",schmidt
 
 Allocate(gridout(1:ccdim(1),1:ccdim(2)),rlld(1:ccdim(1),1:ccdim(2),1:2))
-Allocate(lsdata(1:ccdim(1),1:ccdim(2)),rawdata(1:ccdim(1),1:ccdim(2),1:46+4*wlev))
+Allocate(lsdata(1:ccdim(1),1:ccdim(2)),rawdata(1:ccdim(1),1:ccdim(2),1:52+4*wlev))
 allocate(xyz(ccdim(1),ccdim(2),3),axyz(ccdim(1),ccdim(2),3))
 allocate(bxyz(ccdim(1),ccdim(2),3))
 
@@ -161,7 +161,7 @@ Character(len=*), intent(in) :: outfile
 Character*80, dimension(1:3) :: elemdesc
 Character*80 outname
 character*2 chr
-Real, dimension(1:ccdim(1),1:ccdim(2),1:46+4*wlev), intent(in) :: outdata
+Real, dimension(1:ccdim(1),1:ccdim(2),1:52+4*wlev), intent(in) :: outdata
 Real, dimension(1:ccdim(1),1:ccdim(2)) :: outdatab
 
 Write(6,*) "Appending data to ",trim(outfile)
@@ -288,7 +288,7 @@ if (any(outdata(:,:,44).ne.0.)) then
   elemdesc=(/ 'fracice', 'Sea ice fraction', 'none' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.00005,0.5)
   elemdesc=(/ 'siced', 'Sea ice depth', 'm' /)
-  Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0008,25.)
+  Call ncaddvargen(ncidarr,elemdesc,nf_float,3,varid,0.0008,25.)
 end if
 
 if (any(outdata(:,:,46).ne.0.)) then
@@ -316,6 +316,10 @@ if (any(outdata(:,:,46).ne.0.)) then
     elemdesc(3)='m/s'
     Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,0.)        
   end do
+  elemdesc=(/ 'tggsn4', 'Ice temperature lev 4', 'K' /)
+  Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
+  elemdesc=(/ 'sto', 'Ice storage', 'J' /)
+  Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.1,0.)  
 end if
 
 ncstatus=nf_enddef(ncidarr(0))
@@ -517,7 +521,13 @@ if (any(outdata(:,:,46).ne.0.)) then
     outdatab=max(-100.,min(outdata(:,:,46+3*wlev+i),100.))
     Call ncfindvarid(ncidarr(0),"voc"//chr,outname,varid)
     Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  end do  
+  end do
+  outdatab=max(100.,min(outdata(:,:,50+4*wlev),400.))
+  Call ncfindvarid(ncidarr(0),"tggsn4",outname,varid)
+  Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
+  outdatab=max(0.,min(outdata(:,:,52+4*wlev),1000.))
+  Call ncfindvarid(ncidarr(0),"sto",outname,varid)
+  Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)  
 end if
 
 ncstatus=nf_close(ncidarr(0))

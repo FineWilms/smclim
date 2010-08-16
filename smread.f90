@@ -29,7 +29,7 @@ character*2 chr
 real, dimension(2), intent(in) :: lonlat
 real, dimension(ccdim(1),ccdim(2),3), intent(in) :: xyz,axyz,bxyz
 Real, dimension(1:ccdim(1),1:ccdim(2)), intent(in) :: lsmask
-Real, dimension(1:ccdim(1),1:ccdim(2),1:46+4*wlev), intent(out) :: dataout
+Real, dimension(1:ccdim(1),1:ccdim(2),1:52+4*wlev), intent(out) :: dataout
 Real, dimension(1:ccdim(1),1:ccdim(2)), intent(in) :: grid
 Real, dimension(1:ccdim(1),1:ccdim(2),1:2), intent(in) :: tlld
 Real, dimension(1:ccdim(1),1:ccdim(2),1:2) :: rlld
@@ -82,7 +82,7 @@ End do
 ! Get size of slab
 arrsize=1
 arrsize(1:2,2)=ncsize(1:2)
-Allocate(coverout(1:arrsize(1,2),1:arrsize(2,2),1:46+4*wlev))
+Allocate(coverout(1:arrsize(1,2),1:arrsize(2,2),1:52+4*wlev))
 coverout=0.
 
 ! Read data
@@ -197,6 +197,7 @@ If (nf_inq_varid(ncid,'snd',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading snd"
   varname=(/ 'snd', 'mm' /)
   Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,26),arrsize)
+  coverout(1:arrsize(1,2),:,51+4*wlev)=coverout(1:arrsize(1,2),:,26)
 End If
 
 If (nf_inq_varid(ncid,'smass1',varid).EQ.nf_noerr) Then
@@ -219,10 +220,13 @@ If (nf_inq_varid(ncid,'smass1',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading tggsn1/2/3"
   varname=(/ 'tggsn1', 'K' /)
   Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,33),arrsize)
+  coverout(1:arrsize(1,2),:,47+4*wlev)=coverout(1:arrsize(1,2),:,33)
   varname=(/ 'tggsn2', 'K' /)
   Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,34),arrsize)
+  coverout(1:arrsize(1,2),:,48+4*wlev)=coverout(1:arrsize(1,2),:,34)
   varname=(/ 'tggsn3', 'K' /)
-  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,35),arrsize) 
+  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,35),arrsize)
+  coverout(1:arrsize(1,2),:,49+4*wlev)=coverout(1:arrsize(1,2),:,35) 
 
   Write(6,*) "Reading wbice1/2/3/4/5/6"
   varname=(/ 'wbice1', 'm3/m3' /)
@@ -280,6 +284,10 @@ if (nf_inq_varid(ncid,'ocndepth',varid).EQ.nf_noerr) then
     varname(2)='m/s'
     call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,46+3*wlev+i),arrsize)          
   end do
+  varname=(/ 'tggsn4', 'K' /)
+  call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,50+4*wlev),arrsize)  
+  varname=(/ 'sto', 'J/m2' /)
+  call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,52+4*wlev),arrsize)  
 end if
 
 ncstatus=nf_close(ncid)
@@ -295,6 +303,7 @@ Do ilon=1,ncsize(1)
     if (any((coverout(ilon,ilat,47+3*wlev:46+4*wlev).lt.-10.).or.(coverout(ilon,ilat,47+3*wlev:46+4*wlev).gt.10.))) coverout(ilon,ilat,46)=0.
     if (coverout(ilon,ilat,1).eq.0.) coverout(ilon,ilat,1:43)=0.
     if (coverout(ilon,ilat,44).eq.0.) coverout(ilon,ilat,44:45)=0.
+    if (coverout(ilon,ilat,44).eq.0.) coverout(ilon,ilat,47+4*wlev:52+4*wlev)=0.
     if (coverout(ilon,ilat,46).eq.0.) coverout(ilon,ilat,46:46+4*wlev)=0.
   End Do
 End Do
@@ -333,7 +342,7 @@ Do lcj=1,ccdim(2)
     if (1-nint(lsmask(lci,lcj)).EQ.1) then
       dataout(lci,lcj,44:45)=0.
       countm(lci,lcj)=1
-      dataout(lci,lcj,46:46+4*wlev)=0.
+      dataout(lci,lcj,46:52+4*wlev)=0.
       counto(lci,lcj)=1
     end If
   End Do
@@ -366,6 +375,7 @@ If (any(countn.LT.1).or.any(countm.lt.1).or.any(counto.lt.1)) then
       
       if (countm(lci,lcj).eq.0) then
         dataout(lci,lcj,44:45)=coverout(i,j,44:45)
+        dataout(lci,lcj,47+4*wlev:52+4*wlev)=coverout(i,j,47+4*wlev:52+4*wlev)
         countm(lci,lcj)=1
       end if
         
@@ -426,7 +436,7 @@ If (Any(counto.LT.1)) then
       Do lci=1,ccdim(1)
         If (counto(lci,lcj).EQ.0) then
           call findnear(pxy,lci,lcj,sermask,rlld,ccdim)
-	      dataout(lci,lcj,46:46+4*wlev)=dataout(pxy(1),pxy(2),46:46+4*wlev)
+	      dataout(lci,lcj,46:52+4*wlev)=dataout(pxy(1),pxy(2),46:52+4*wlev)
 	      counto(lci,lcj)=counto(pxy(1),pxy(2))
         End if
       End do
@@ -456,12 +466,24 @@ End do
 Do k=46,46+4*wlev
   dataout(:,:,k)=dataout(:,:,k)/Real(counto)
 End do
+Do k=47+4*wlev,52+4*wlev
+  dataout(:,:,k)=dataout(:,:,k)/Real(countm)
+End do
 
 do k=1,6
   where(dataout(:,:,46).ne.0.) ! water
     dataout(:,:,6+k)=dataout(:,:,46+k)
   end where
 end do
+do k=1,3
+  where(dataout(:,:,46).ne.0.) ! water
+    dataout(:,:,32+k)=dataout(:,:,46+4*wlev+k)
+  end where
+end do
+where(dataout(:,:,46).ne.0.) ! water
+  dataout(:,:,26)=dataout(:,:,51+4*wlev+k)
+end where
+
 
 do lcj=1,ccdim(2)
   do lci=1,ccdim(1)

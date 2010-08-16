@@ -1,6 +1,6 @@
 FF = ifort
-XFLAGS = -O
-LIBS = -lnetcdf
+XFLAGS = -O -I/tools/netcdf/3.6.1/include
+LIBS = -L/tools/netcdf/3.6.1/lib -lnetcdf
 LDFLAGS = 
 
 OBJT = smclim.o smread.o setxyz_m.o ccinterp.o readswitch.o jimcc_m.o \
@@ -9,7 +9,7 @@ OBJT = smclim.o smread.o setxyz_m.o ccinterp.o readswitch.o jimcc_m.o \
        nfft_m.o misc.o
 
 smclim :$(OBJT)
-	$(FF) $(XFLAGS) $(OBJT) $(LDFLAGS) -o smclim
+	$(FF) $(XFLAGS) $(OBJT) $(LDFLAGS) $(LIBS) -o smclim
 
 clean:
 	rm *.o core *.mod 
