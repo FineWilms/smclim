@@ -29,7 +29,7 @@ character*2 chr
 real, dimension(2), intent(in) :: lonlat
 real, dimension(ccdim(1),ccdim(2),3), intent(in) :: xyz,axyz,bxyz
 Real, dimension(1:ccdim(1),1:ccdim(2)), intent(in) :: lsmask
-Real, dimension(1:ccdim(1),1:ccdim(2),1:52+4*wlev), intent(out) :: dataout
+Real, dimension(1:ccdim(1),1:ccdim(2),1:53+4*wlev), intent(out) :: dataout
 Real, dimension(1:ccdim(1),1:ccdim(2)), intent(in) :: grid
 Real, dimension(1:ccdim(1),1:ccdim(2),1:2), intent(in) :: tlld
 Real, dimension(1:ccdim(1),1:ccdim(2),1:2) :: rlld
@@ -42,17 +42,17 @@ real, dimension(ccdim(1)*ccdim(2)) :: x,y,z
 real, dimension(1:wlev) :: uzon,vmer
 Logical, dimension(:,:), allocatable :: sermask
 
-dataout=0.
-countn=0
-countm=0
-counto=0.
+dataout=0. ! store data
+countn=0   ! count for land points
+countm=0   ! count for seaice points
+counto=0.  ! count for water points
 
+! set-up rotations for currents
 polenx=-cos(lonlat(2)*3.1415926536/180.)
 poleny=0.
 polenz=sin(lonlat(1)*3.1415926536/180.)
 
 ! Open nc moisture file
-
 ncstatus=nf_open(climfile,nf_nowrite,ncid)
 If (ncstatus.NE.nf_noerr) Then
   Write(6,*) "ERROR: Error opening NetCDF file ",trim(climfile)," (",ncstatus,")"
@@ -82,7 +82,7 @@ End do
 ! Get size of slab
 arrsize=1
 arrsize(1:2,2)=ncsize(1:2)
-Allocate(coverout(1:arrsize(1,2),1:arrsize(2,2),1:52+4*wlev))
+Allocate(coverout(1:arrsize(1,2),1:arrsize(2,2),1:53+4*wlev))
 coverout=0.
 
 ! Read data
@@ -197,7 +197,6 @@ If (nf_inq_varid(ncid,'snd',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading snd"
   varname=(/ 'snd', 'mm' /)
   Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,26),arrsize)
-  coverout(1:arrsize(1,2),:,51+4*wlev)=coverout(1:arrsize(1,2),:,26)
 End If
 
 If (nf_inq_varid(ncid,'smass1',varid).EQ.nf_noerr) Then
@@ -216,17 +215,6 @@ If (nf_inq_varid(ncid,'smass1',varid).EQ.nf_noerr) Then
   Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,31),arrsize)
   varname=(/ 'ssdn3', 'K' /)
   Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,32),arrsize)
-
-  Write(6,*) "Reading tggsn1/2/3"
-  varname=(/ 'tggsn1', 'K' /)
-  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,33),arrsize)
-  coverout(1:arrsize(1,2),:,47+4*wlev)=coverout(1:arrsize(1,2),:,33)
-  varname=(/ 'tggsn2', 'K' /)
-  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,34),arrsize)
-  coverout(1:arrsize(1,2),:,48+4*wlev)=coverout(1:arrsize(1,2),:,34)
-  varname=(/ 'tggsn3', 'K' /)
-  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,35),arrsize)
-  coverout(1:arrsize(1,2),:,49+4*wlev)=coverout(1:arrsize(1,2),:,35) 
 
   Write(6,*) "Reading wbice1/2/3/4/5/6"
   varname=(/ 'wbice1', 'm3/m3' /)
@@ -251,71 +239,97 @@ If (nf_inq_varid(ncid,'smass1',varid).EQ.nf_noerr) Then
   Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,43),arrsize)
 End If
 
+coverout(1:arrsize(1,2),:,33:35)=272.2
+If (nf_inq_varid(ncid,'tggsn1',varid).EQ.nf_noerr) Then
+  Write(6,*) "Reading tggsn1/2/3"
+  varname=(/ 'tggsn1', 'K' /)
+  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,33),arrsize)
+  varname=(/ 'tggsn2', 'K' /)
+  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,34),arrsize)
+  varname=(/ 'tggsn3', 'K' /)
+  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,35),arrsize)
+End If
+
+If (nf_inq_varid(ncid,'swater',varid).EQ.nf_noerr) Then
+  Write(6,*) "Reading swater"
+  varname=(/ 'swater', 'mm' /)
+  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,44),arrsize)
+End If
+
 If (nf_inq_varid(ncid,'fracice',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading fracice"
   varname=(/ 'fracice', 'none' /)
-  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,44),arrsize)
+  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,45),arrsize)
   Write(6,*) "Reading siced"
   varname=(/ 'siced', 'm' /)
-  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,45),arrsize)
+  Call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,46),arrsize)
 End If
 
 if (nf_inq_varid(ncid,'ocndepth',varid).EQ.nf_noerr) then
   write(6,*) "Reading ocndepth"
   varname=(/ 'ocndepth', 'm' /)
-  call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,46),arrsize)
+  call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,47),arrsize)
   write(6,*) "Reading tgg,sal,uoc,voc"
-  coverout(1:arrsize(1,2),:,47:52)=coverout(1:arrsize(1,2),:,7:12)
+  coverout(1:arrsize(1,2),:,48:53)=coverout(1:arrsize(1,2),:,7:12)
   do i=7,wlev
     write(chr,'(I2.2)') i
     varname(1)='tgg'//chr
     varname(2)='K'
-    call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,46+i),arrsize)
+    call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,47+i),arrsize)
   end do
   do i=1,wlev
     write(chr,'(I2.2)') i
     varname(1)='sal'//chr
     varname(2)='PSU'
-    call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,46+wlev+i),arrsize)
+    call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,47+wlev+i),arrsize)
     varname(1)='uoc'//chr
     varname(2)='m/s'
-    call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,46+2*wlev+i),arrsize)
+    call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,47+2*wlev+i),arrsize)
     varname(1)='voc'//chr
     varname(2)='m/s'
-    call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,46+3*wlev+i),arrsize)          
+    call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,47+3*wlev+i),arrsize)          
   end do
+end if
+
+coverout(1:arrsize(1,2),:,48+4*wlev:51+4*wlev)=272.2
+if (nf_inq_varid(ncid,'sto',varid).EQ.nf_noerr) then
+  write(6,*) "Reading tggsn4,sto"
+  coverout(1:arrsize(1,2),:,48+4*wlev)=coverout(1:arrsize(1,2),:,33) ! tggsn1
+  coverout(1:arrsize(1,2),:,49+4*wlev)=coverout(1:arrsize(1,2),:,34) ! tggsn2
+  coverout(1:arrsize(1,2),:,50+4*wlev)=coverout(1:arrsize(1,2),:,35) ! tggsn3
   varname=(/ 'tggsn4', 'K' /)
-  call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,50+4*wlev),arrsize)  
+  call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,51+4*wlev),arrsize)
+  coverout(1:arrsize(1,2),:,52+4*wlev)=coverout(1:arrsize(1,2),:,26) ! snd    
   varname=(/ 'sto', 'J/m2' /)
-  call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,52+4*wlev),arrsize)  
+  call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,53+4*wlev),arrsize)  
 end if
 
 ncstatus=nf_close(ncid)
 
+! clean up input data
 Do ilon=1,ncsize(1)
   Do ilat=1,ncsize(2)
     If (any((coverout(ilon,ilat,1:6).GT.2).OR.(coverout(ilon,ilat,1:6).lt.-2.))) coverout(ilon,ilat,1)=0.
     If (any((coverout(ilon,ilat,7:12).GT.350.).OR.(coverout(ilon,ilat,7:12).LT.250.))) coverout(ilon,ilat,1)=0.
-    If (any((coverout(ilon,ilat,44:45).lt.0.))) coverout(ilon,ilat,44)=0.
-    if (any((coverout(ilon,ilat,47:46+wlev).lt.250.).or.(coverout(ilon,ilat,47:46+wlev).gt.350.))) coverout(ilon,ilat,46)=0.
-    if (any((coverout(ilon,ilat,47+wlev:46+2*wlev).lt.0.).or.(coverout(ilon,ilat,47+wlev:46+2*wlev).gt.100.))) coverout(ilon,ilat,46)=0.
-    if (any((coverout(ilon,ilat,47+2*wlev:46+3*wlev).lt.-10.).or.(coverout(ilon,ilat,47+2*wlev:46+3*wlev).gt.10.))) coverout(ilon,ilat,46)=0.
-    if (any((coverout(ilon,ilat,47+3*wlev:46+4*wlev).lt.-10.).or.(coverout(ilon,ilat,47+3*wlev:46+4*wlev).gt.10.))) coverout(ilon,ilat,46)=0.
-    if (coverout(ilon,ilat,1).eq.0.) coverout(ilon,ilat,1:43)=0.
-    if (coverout(ilon,ilat,44).eq.0.) coverout(ilon,ilat,44:45)=0.
-    if (coverout(ilon,ilat,44).eq.0.) coverout(ilon,ilat,47+4*wlev:52+4*wlev)=0.
-    if (coverout(ilon,ilat,46).eq.0.) coverout(ilon,ilat,46:46+4*wlev)=0.
+    If (any((coverout(ilon,ilat,45:46).lt.0.))) coverout(ilon,ilat,45)=0.
+    if (any((coverout(ilon,ilat,48:47+wlev).lt.250.).or.(coverout(ilon,ilat,48:47+wlev).gt.350.))) coverout(ilon,ilat,47)=0.
+    if (any((coverout(ilon,ilat,48+wlev:47+2*wlev).lt.0.).or.(coverout(ilon,ilat,48+wlev:47+2*wlev).gt.100.))) coverout(ilon,ilat,47)=0.
+    if (any((coverout(ilon,ilat,48+2*wlev:47+3*wlev).lt.-10.).or.(coverout(ilon,ilat,48+2*wlev:47+3*wlev).gt.10.))) coverout(ilon,ilat,47)=0.
+    if (any((coverout(ilon,ilat,48+3*wlev:47+4*wlev).lt.-10.).or.(coverout(ilon,ilat,48+3*wlev:47+4*wlev).gt.10.))) coverout(ilon,ilat,47)=0.
+    if (coverout(ilon,ilat,1).eq.0.) coverout(ilon,ilat,1:44)=0.
+    if (coverout(ilon,ilat,45).eq.0.) coverout(ilon,ilat,45:46)=0.
+    if (coverout(ilon,ilat,47).eq.0.) coverout(ilon,ilat,47:53+4*wlev)=0.
   End Do
 End Do
 
-! Bin data (not ocean points)
+! Bin data (not ocean points since each ocean point has a different vertical level structure)
 Write(6,*) 'Bin'
 
 Do ilat=1,ncsize(2)
   aglat=smlonlat(2,1)+real(ilat-1)*(smlonlat(2,2)-smlonlat(2,1))/(smlonlat(2,3)-1.)
   Do ilon=1,ncsize(1)
 
-    If ((coverout(ilon,ilat,1).ne.0.).or.(coverout(ilon,ilat,43).ne.0.)) then
+    If ((coverout(ilon,ilat,1).ne.0.).or.(coverout(ilon,ilat,45).ne.0.)) then
 
       aglon=smlonlat(1,1)+real(ilon-1)*(smlonlat(1,2)-smlonlat(1,1))/(smlonlat(1,3)-1.)
 
@@ -324,25 +338,25 @@ Do ilat=1,ncsize(2)
       lcj = nint(alcj)
       lcj = lcj+nface*ccdim(1)
   
-      dataout(lci,lcj,1:45)=dataout(lci,lcj,1:45)+coverout(ilon,ilat,1:45)
+      dataout(lci,lcj,1:46)=dataout(lci,lcj,1:46)+coverout(ilon,ilat,1:46)
       if (coverout(ilon,ilat,1).ne.0.) countn(lci,lcj)=countn(lci,lcj)+1
-      if (coverout(ilon,ilat,44).ne.0.) countm(lci,lcj)=countm(lci,lcj)+1
+      if (coverout(ilon,ilat,45).ne.0.) countm(lci,lcj)=countm(lci,lcj)+1
     End if
     
   End Do
 End Do
 
-
+! assign null values over land/sea
 Do lcj=1,ccdim(2)
   Do lci=1,ccdim(1)
     if (1-nint(lsmask(lci,lcj)).EQ.0) then
-      dataout(lci,lcj,1:43)=0.
+      dataout(lci,lcj,1:44)=0.
       countn(lci,lcj)=1
     end if
     if (1-nint(lsmask(lci,lcj)).EQ.1) then
-      dataout(lci,lcj,44:45)=0.
+      dataout(lci,lcj,45:46)=0.
       countm(lci,lcj)=1
-      dataout(lci,lcj,46:52+4*wlev)=0.
+      dataout(lci,lcj,47:53+4*wlev)=0.
       counto(lci,lcj)=1
     end If
   End Do
@@ -369,18 +383,17 @@ If (any(countn.LT.1).or.any(countm.lt.1).or.any(counto.lt.1)) then
       j=nint(serlat)
 
       if (countn(lci,lcj).eq.0.and.coverout(i,j,1).ne.0.) then
-        dataout(lci,lcj,1:43)=coverout(i,j,1:43)
+        dataout(lci,lcj,1:44)=coverout(i,j,1:44)
         countn(lci,lcj)=1
       end if
       
       if (countm(lci,lcj).eq.0) then
-        dataout(lci,lcj,44:45)=coverout(i,j,44:45)
-        dataout(lci,lcj,47+4*wlev:52+4*wlev)=coverout(i,j,47+4*wlev:52+4*wlev)
+        dataout(lci,lcj,45:46)=coverout(i,j,45:46)
         countm(lci,lcj)=1
       end if
         
-      if (counto(lci,lcj).eq.0.and.coverout(i,j,46).ne.0.) then
-        dataout(lci,lcj,46:46+4*wlev)=coverout(i,j,46:46+4*wlev)
+      if (counto(lci,lcj).eq.0.and.coverout(i,j,47).ne.0.) then
+        dataout(lci,lcj,47:53+4*wlev)=coverout(i,j,47:53+4*wlev)
         counto(lci,lcj)=1
       end if
 
@@ -409,7 +422,7 @@ If (Any(countn.LT.1)) then
     Do lci=1,ccdim(1)
       If (countn(lci,lcj).EQ.0) then
         call findnear(pxy,lci,lcj,sermask,rlld,ccdim)
-	    dataout(lci,lcj,1:43)=dataout(pxy(1),pxy(2),1:43)
+	    dataout(lci,lcj,1:44)=dataout(pxy(1),pxy(2),1:44)
 	    countn(lci,lcj)=countn(pxy(1),pxy(2))
       End if
     End do
@@ -426,17 +439,17 @@ End if
 If (Any(counto.LT.1)) then
   Write(6,*) "Use near nbr for water"
   allocate(sermask(ccdim(1),ccdim(2)))
-  sermask(:,:)=(counto(:,:).GT.0).AND.(dataout(:,:,46).ne.0.)
+  sermask(:,:)=(counto(:,:).GT.0).AND.(dataout(:,:,47).ne.0.)
   If (.NOT.any(sermask)) Then
     Write(6,*) "WARN: Cannot find valid ocean data"
-    dataout(:,:,46)=0.
+    dataout(:,:,47)=0.
     counto=1
   Else
     Do lcj=1,ccdim(2)
       Do lci=1,ccdim(1)
         If (counto(lci,lcj).EQ.0) then
           call findnear(pxy,lci,lcj,sermask,rlld,ccdim)
-	      dataout(lci,lcj,46:52+4*wlev)=dataout(pxy(1),pxy(2),46:52+4*wlev)
+	      dataout(lci,lcj,47:53+4*wlev)=dataout(pxy(1),pxy(2),47:53+4*wlev)
 	      counto(lci,lcj)=counto(pxy(1),pxy(2))
         End if
       End do
@@ -457,37 +470,34 @@ If (Any(countn.LT.1).or.Any(countm.LT.1).or.any(counto.lt.1)) then
   Stop
 End If
 
-Do k=1,43
+Do k=1,44
   dataout(:,:,k)=dataout(:,:,k)/Real(countn)
 End do
-Do k=44,45
+Do k=45,46
   dataout(:,:,k)=dataout(:,:,k)/Real(countm)
 End do
-Do k=46,46+4*wlev
+Do k=47,53+4*wlev
   dataout(:,:,k)=dataout(:,:,k)/Real(counto)
-End do
-Do k=47+4*wlev,52+4*wlev
-  dataout(:,:,k)=dataout(:,:,k)/Real(countm)
 End do
 
 do k=1,6
-  where(dataout(:,:,46).ne.0.) ! water
-    dataout(:,:,6+k)=dataout(:,:,46+k)
+  where(dataout(:,:,47).ne.0.) ! water
+    dataout(:,:,6+k)=dataout(:,:,47+k)
   end where
 end do
 do k=1,3
-  where(dataout(:,:,46).ne.0.) ! water
-    dataout(:,:,32+k)=dataout(:,:,46+4*wlev+k)
+  where(dataout(:,:,47).ne.0.) ! water
+    dataout(:,:,32+k)=dataout(:,:,47+4*wlev+k)
   end where
 end do
-where(dataout(:,:,46).ne.0.) ! water
-  dataout(:,:,26)=dataout(:,:,51+4*wlev+k)
+where(dataout(:,:,47).ne.0.) ! water
+  dataout(:,:,26)=dataout(:,:,52+4*wlev+k)
 end where
 
 
 do lcj=1,ccdim(2)
   do lci=1,ccdim(1)
-    if (dataout(lci,lcj,46).ne.0.) then
+    if (dataout(lci,lcj,47).ne.0.) then
       ! rotate current to CC coordinates
       zonx=                     -polenz*xyz(lci,lcj,2)
       zony=polenz*xyz(lci,lcj,1)-polenx*xyz(lci,lcj,3)
@@ -495,10 +505,10 @@ do lcj=1,ccdim(2)
       den=sqrt( max(zonx**2 + zony**2 + zonz**2,1.e-7) )  ! allow for poles
       costh= (zonx*axyz(lci,lcj,1)+zony*axyz(lci,lcj,2)+zonz*axyz(lci,lcj,3))/den
       sinth=-(zonx*bxyz(lci,lcj,1)+zony*bxyz(lci,lcj,2)+zonz*bxyz(lci,lcj,3))/den
-      uzon(:)=dataout(lci,lcj,46+2*wlev+1:46+3*wlev)
-      vmer(:)=dataout(lci,lcj,46+3*wlev+1:46+4*wlev)
-      dataout(lci,lcj,46+2*wlev+1:46+3*wlev)= costh*uzon(:)+sinth*vmer(:)
-      dataout(lci,lcj,46+3*wlev+1:46+4*wlev)=-sinth*uzon(:)+costh*vmer(:)
+      uzon(:)=dataout(lci,lcj,47+2*wlev+1:47+3*wlev)
+      vmer(:)=dataout(lci,lcj,47+3*wlev+1:47+4*wlev)
+      dataout(lci,lcj,47+2*wlev+1:47+3*wlev)= costh*uzon(:)+sinth*vmer(:)
+      dataout(lci,lcj,47+3*wlev+1:47+4*wlev)=-sinth*uzon(:)+costh*vmer(:)
     end if
   end do
 end do
