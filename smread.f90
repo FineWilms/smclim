@@ -309,16 +309,22 @@ ncstatus=nf_close(ncid)
 ! clean up input data
 Do ilon=1,ncsize(1)
   Do ilat=1,ncsize(2)
-    If (any((coverout(ilon,ilat,1:6).GT.2).OR.(coverout(ilon,ilat,1:6).lt.-2.))) coverout(ilon,ilat,1)=0.
-    If (any((coverout(ilon,ilat,7:12).GT.350.).OR.(coverout(ilon,ilat,7:12).LT.250.))) coverout(ilon,ilat,1)=0.
+    If (any(coverout(ilon,ilat,1:6).lt.0.)) coverout(ilon,ilat,1)=0.
+    If (any((coverout(ilon,ilat,7:12).gt.400.).or.(coverout(ilon,ilat,7:12).lt.200.))) coverout(ilon,ilat,1)=0.
     If (any((coverout(ilon,ilat,45:46).lt.0.))) coverout(ilon,ilat,45)=0.
-    if (any((coverout(ilon,ilat,48:47+wlev).lt.250.).or.(coverout(ilon,ilat,48:47+wlev).gt.350.))) coverout(ilon,ilat,47)=0.
+    if (any((coverout(ilon,ilat,48:47+wlev).lt.200.).or.(coverout(ilon,ilat,48:47+wlev).gt.400.))) coverout(ilon,ilat,47)=0.
     if (any((coverout(ilon,ilat,48+wlev:47+2*wlev).lt.0.).or.(coverout(ilon,ilat,48+wlev:47+2*wlev).gt.100.))) coverout(ilon,ilat,47)=0.
-    if (any((coverout(ilon,ilat,48+2*wlev:47+3*wlev).lt.-10.).or.(coverout(ilon,ilat,48+2*wlev:47+3*wlev).gt.10.))) coverout(ilon,ilat,47)=0.
-    if (any((coverout(ilon,ilat,48+3*wlev:47+4*wlev).lt.-10.).or.(coverout(ilon,ilat,48+3*wlev:47+4*wlev).gt.10.))) coverout(ilon,ilat,47)=0.
-    if (coverout(ilon,ilat,1).eq.0.) coverout(ilon,ilat,1:44)=0.
+    if (coverout(ilon,ilat,1).eq.0.) then
+      coverout(ilon,ilat,1:44)=0.
+    else
+      coverout(ilon,ilat,47:53+4*wlev)=0.
+    end if
     if (coverout(ilon,ilat,45).eq.0.) coverout(ilon,ilat,45:46)=0.
-    if (coverout(ilon,ilat,47).eq.0.) coverout(ilon,ilat,47:53+4*wlev)=0.
+    if (coverout(ilon,ilat,47).eq.0.) then
+      coverout(ilon,ilat,47:53+4*wlev)=0.
+    else
+      coverout(ilon,ilat,1:46)=0.
+    end if
   End Do
 End Do
 

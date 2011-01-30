@@ -16,6 +16,8 @@ clean:
 # This section gives the rules for building object modules.
 
 .SUFFIXES:.f90
+smread.o: smread.f90
+	$(FF)  -c -override-limits $(XFLAGS) $<	
 .f90.o:
 	$(FF) -c $(XFLAGS) $<
 .f.o:
