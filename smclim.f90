@@ -120,7 +120,7 @@ Write(6,*) "lon0,lat0 : ",lonlat
 Write(6,*) "Schmidt   : ",schmidt
 
 Allocate(gridout(1:ccdim(1),1:ccdim(2)),rlld(1:ccdim(1),1:ccdim(2),1:2))
-Allocate(lsdata(1:ccdim(1),1:ccdim(2)),rawdata(1:ccdim(1),1:ccdim(2),1:53+4*wlev))
+Allocate(lsdata(1:ccdim(1),1:ccdim(2)),rawdata(1:ccdim(1),1:ccdim(2),1:55+4*wlev))
 allocate(xyz(ccdim(1),ccdim(2),3),axyz(ccdim(1),ccdim(2),3))
 allocate(bxyz(ccdim(1),ccdim(2),3))
 
@@ -161,7 +161,7 @@ Character(len=*), intent(in) :: outfile
 Character*80, dimension(1:3) :: elemdesc
 Character*80 outname
 character*2 chr
-Real, dimension(1:ccdim(1),1:ccdim(2),1:53+4*wlev), intent(in) :: outdata
+Real, dimension(1:ccdim(1),1:ccdim(2),1:55+4*wlev), intent(in) :: outdata
 Real, dimension(1:ccdim(1),1:ccdim(2)) :: outdatab
 
 Write(6,*) "Appending data to ",trim(outfile)
@@ -331,6 +331,13 @@ if (any(outdata(:,:,51+4*wlev).ne.0.)) then
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
   elemdesc=(/ 'sto', 'Ice storage', 'J' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.1,0.)
+end if
+
+if (any(outdata(:,:,54+4*wlev).ne.0.)) then
+  elemdesc=(/ 'uic', 'x-component ice', 'm/s' /)
+  Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,0.)
+  elemdesc=(/ 'vic', 'y-component ice', 'm/s' /)
+  Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,0.)
 end if
 
 ncstatus=nf_enddef(ncidarr(0))
@@ -552,6 +559,16 @@ if (any(outdata(:,:,51+4*wlev).ne.0.)) then
   outdatab=max(0.,min(outdata(:,:,53+4*wlev),1000.))
   Call ncfindvarid(ncidarr(0),"sto",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)  
+end if
+
+if (any(outdata(:,:,51+4*wlev).ne.0.)) then
+  Write(6,*) "Replacing uic,vic"
+  outdatab=max(-100.,min(outdata(:,:,54+4*wlev),100.))
+  Call ncfindvarid(ncidarr(0),"uic",outname,varid)
+  Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
+  outdatab=max(-100.,min(outdata(:,:,55+4*wlev),100.))
+  Call ncfindvarid(ncidarr(0),"vic",outname,varid)
+  Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
 end if
 
 ncstatus=nf_close(ncidarr(0))

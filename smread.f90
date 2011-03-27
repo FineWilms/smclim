@@ -29,7 +29,7 @@ character*2 chr
 real, dimension(2), intent(in) :: lonlat
 real, dimension(ccdim(1),ccdim(2),3), intent(in) :: xyz,axyz,bxyz
 Real, dimension(1:ccdim(1),1:ccdim(2)), intent(in) :: lsmask
-Real, dimension(1:ccdim(1),1:ccdim(2),1:53+4*wlev), intent(out) :: dataout
+Real, dimension(1:ccdim(1),1:ccdim(2),1:55+4*wlev), intent(out) :: dataout
 Real, dimension(1:ccdim(1),1:ccdim(2)), intent(in) :: grid
 Real, dimension(1:ccdim(1),1:ccdim(2),1:2), intent(in) :: tlld
 Real, dimension(1:ccdim(1),1:ccdim(2),1:2) :: rlld
@@ -82,7 +82,7 @@ End do
 ! Get size of slab
 arrsize=1
 arrsize(1:2,2)=ncsize(1:2)
-Allocate(coverout(1:arrsize(1,2),1:arrsize(2,2),1:53+4*wlev))
+Allocate(coverout(1:arrsize(1,2),1:arrsize(2,2),1:55+4*wlev))
 coverout=0.
 
 ! Read data
@@ -304,6 +304,14 @@ if (nf_inq_varid(ncid,'sto',varid).EQ.nf_noerr) then
   call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,53+4*wlev),arrsize)  
 end if
 
+if (nf_inq_varid(ncid,'uic',varid).eq.nf_noerr) then
+  write(6,*) "Reading uic,vic"
+  varname=(/ 'uic', 'm/s' /)
+  call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,54+4*wlev),arrsize)
+  varname=(/ 'vic', 'm/s' /)
+  call getmeta(ncid,varname,coverout(1:arrsize(1,2),:,55+4*wlev),arrsize)
+end if
+
 ncstatus=nf_close(ncid)
 
 ! clean up input data
@@ -317,11 +325,11 @@ Do ilon=1,ncsize(1)
     if (coverout(ilon,ilat,1).eq.0.) then
       coverout(ilon,ilat,1:44)=0.
     else
-      coverout(ilon,ilat,47:53+4*wlev)=0.
+      coverout(ilon,ilat,47:55+4*wlev)=0.
     end if
     if (coverout(ilon,ilat,45).eq.0.) coverout(ilon,ilat,45:46)=0.
     if (coverout(ilon,ilat,47).eq.0.) then
-      coverout(ilon,ilat,47:53+4*wlev)=0.
+      coverout(ilon,ilat,47:55+4*wlev)=0.
     else
       coverout(ilon,ilat,1:46)=0.
     end if
@@ -362,7 +370,7 @@ Do lcj=1,ccdim(2)
     if (1-nint(lsmask(lci,lcj)).EQ.1) then
       dataout(lci,lcj,45:46)=0.
       countm(lci,lcj)=1
-      dataout(lci,lcj,47:53+4*wlev)=0.
+      dataout(lci,lcj,47:55+4*wlev)=0.
       counto(lci,lcj)=1
     end If
   End Do
@@ -399,7 +407,7 @@ If (any(countn.LT.1).or.any(countm.lt.1).or.any(counto.lt.1)) then
       end if
         
       if (counto(lci,lcj).eq.0.and.coverout(i,j,47).ne.0.) then
-        dataout(lci,lcj,47:53+4*wlev)=coverout(i,j,47:53+4*wlev)
+        dataout(lci,lcj,47:55+4*wlev)=coverout(i,j,47:55+4*wlev)
         counto(lci,lcj)=1
       end if
 
@@ -455,7 +463,7 @@ If (Any(counto.LT.1)) then
       Do lci=1,ccdim(1)
         If (counto(lci,lcj).EQ.0) then
           call findnear(pxy,lci,lcj,sermask,rlld,ccdim)
-	      dataout(lci,lcj,47:53+4*wlev)=dataout(pxy(1),pxy(2),47:53+4*wlev)
+	      dataout(lci,lcj,47:55+4*wlev)=dataout(pxy(1),pxy(2),47:55+4*wlev)
 	      counto(lci,lcj)=counto(pxy(1),pxy(2))
         End if
       End do
@@ -482,7 +490,7 @@ End do
 Do k=45,46
   dataout(:,:,k)=dataout(:,:,k)/Real(countm)
 End do
-Do k=47,53+4*wlev
+Do k=47,55+4*wlev
   dataout(:,:,k)=dataout(:,:,k)/Real(counto)
 End do
 
