@@ -9,7 +9,7 @@ Integer :: nopts
 Character*80, dimension(:,:), allocatable :: options
 
 Write(6,*) 'SMCLIM - interpolate/bin climatology soil moisture/temperature on'
-Write(6,*) '         conformal-cubic grid (JAN-11)'
+Write(6,*) '         conformal-cubic grid (JAN-12)'
 
 ! Read switches
 nopts=3
@@ -96,13 +96,16 @@ Use ccinterp
 
 Implicit None
 
+include 'netcdf.inc'
+
 Integer, intent(in) :: nopts
 Integer, dimension(1:2) :: ccdim
-integer, parameter :: wlev = 20
+integer :: wlev = 20
+integer ncid,ncstatus,olevid
 Character(len=*), dimension(nopts,2), intent(in) :: options
 Character*80 climfile,outfile,topofile,bintmp,returnoption
 Character*9 formout
-Character*45 header
+Character*47 header
 Real, dimension(:,:,:), allocatable :: rlld,xyz,axyz,bxyz
 Real, dimension(:,:), allocatable :: lsdata,gridout
 Real, dimension(:,:,:), allocatable :: rawdata
@@ -119,8 +122,26 @@ Write(6,*) "Dimension : ",ccdim
 Write(6,*) "lon0,lat0 : ",lonlat
 Write(6,*) "Schmidt   : ",schmidt
 
+! Open nc moisture file
+ncstatus=nf_open(climfile,nf_nowrite,ncid)
+If (ncstatus.NE.nf_noerr) Then
+  Write(6,*) "ERROR: Error opening NetCDF file ",trim(climfile)," (",ncstatus,")"
+  Stop
+End If
+ncstatus = nf_inq_dimid(ncid,'olev',olevid)
+if (ncstatus.eq.nf_noerr) Then
+  ncstatus = nf_inq_dimlen(ncid,olevid,wlev)
+  If (ncstatus.NE.nf_noerr) Then
+    Write(6,*) "ERROR: Cannot determine olev len (",ncstatus,")"
+    Stop
+  End If
+else
+  write(6,*) "WARN: Cannot locate olev in input file"
+  write(6,*) "Using wlev ",wlev
+end if
+
 Allocate(gridout(1:ccdim(1),1:ccdim(2)),rlld(1:ccdim(1),1:ccdim(2),1:2))
-Allocate(lsdata(1:ccdim(1),1:ccdim(2)),rawdata(1:ccdim(1),1:ccdim(2),1:55+4*wlev))
+Allocate(lsdata(1:ccdim(1),1:ccdim(2)),rawdata(1:ccdim(1),1:ccdim(2),1:57+4*wlev))
 allocate(xyz(ccdim(1),ccdim(2),3),axyz(ccdim(1),ccdim(2),3))
 allocate(bxyz(ccdim(1),ccdim(2),3))
 
@@ -132,7 +153,7 @@ Write(6,*) "Read land/sea mask"
 Call gettopols(1,topofile,lsdata,ccdim)
 
 ! Get climate soil moisture
-Call getsmdata(climfile,rawdata,lsdata,gridout,rlld,ccdim,wlev,lonlat,xyz,axyz,bxyz)
+Call getsmdata(ncid,rawdata,lsdata,gridout,rlld,ccdim,wlev,lonlat,xyz,axyz,bxyz)
 
 ! Write output soil moisture data (currently disabled)
 Call storesm(outfile,rawdata,ccdim,wlev)
@@ -153,6 +174,7 @@ Implicit None
 Include "netcdf.inc"
 
 integer, intent(in) :: wlev
+integer olevid
 Integer, dimension(1:2), intent(in) :: ccdim
 Integer, dimension(0:4) :: ncidarr
 Integer, dimension(1:4) :: dimnum
@@ -161,7 +183,7 @@ Character(len=*), intent(in) :: outfile
 Character*80, dimension(1:3) :: elemdesc
 Character*80 outname
 character*2 chr
-Real, dimension(1:ccdim(1),1:ccdim(2),1:55+4*wlev), intent(in) :: outdata
+Real, dimension(1:ccdim(1),1:ccdim(2),1:57+4*wlev), intent(in) :: outdata
 Real, dimension(1:ccdim(1),1:ccdim(2)) :: outdatab
 
 Write(6,*) "Appending data to ",trim(outfile)
@@ -183,6 +205,16 @@ dimnum(1:2)=ccdim(1:2)
 dimnum(3:4)=1
 
 ncstatus=nf_redef(ncidarr(0))
+
+ncstatus=nf_def_dim(ncidarr(0),"olev",wlev,olevid)
+If (ncstatus /= nf_noerr) Then
+  if (ncstatus.eq.nf_enameinuse) then
+    write(6,*) "WARN: Dimension olev already exists"
+  else
+    Write(6,*) "ERROR: Error defining dim in NetCDF file (",ncstatus,"): olev"
+    Stop
+  end if
+End If
 
 elemdesc=(/ 'wetfrac1', 'Wetness fraction layer 1', 'none' /)
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0002,0.)
@@ -238,16 +270,18 @@ if (any(outdata(:,:,13).ne.0.)) then
 end if
 
 if (any(outdata(:,:,25).ne.0.)) then
-  elemdesc=(/ 'urbansm', 'urban soil mositure', 'm3/m3' /)
+  elemdesc=(/ 'urbnsmc', 'urban canyon soil mositure', 'm3/m3' /)
+  Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0001,0.5)
+  elemdesc=(/ 'urbnsmr', 'urban roof soil mositure', 'm3/m3' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0001,0.5)
 end if
 
-if (any(outdata(:,:,26).ne.0.)) then
+if (any(outdata(:,:,27).ne.0.)) then
   elemdesc=(/ 'snd', 'Snow depth (liquid water)', 'mm' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_float,3,varid,1.,0.)
 end if
 
-if (any(outdata(:,:,27).ne.0.)) then
+if (any(outdata(:,:,28).ne.0.)) then
   elemdesc=(/ 'smass1', 'Snow mass lev 1', 'K' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.01,250.)
   elemdesc=(/ 'smass2', 'Snow mass lev 2', 'K' /)
@@ -278,7 +312,7 @@ if (any(outdata(:,:,27).ne.0.)) then
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0004,0.)
 end if
 
-if (any(outdata(:,:,33).ne.0.)) then
+if (any(outdata(:,:,34).ne.0.)) then
   elemdesc=(/ 'tggsn1', 'Snow temperature lev 1', 'K' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
   elemdesc=(/ 'tggsn2', 'Snow temperature lev 2', 'K' /)
@@ -287,21 +321,23 @@ if (any(outdata(:,:,33).ne.0.)) then
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
 end if
 
-if (any(outdata(:,:,44).ne.0.)) then
+if (any(outdata(:,:,45).ne.0.)) then
   elemdesc=(/ 'swater', 'Surface water', 'mm' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.002,65.)
 end if
 
-if (any(outdata(:,:,45).ne.0.)) then
+if (any(outdata(:,:,46).ne.0.)) then
   elemdesc=(/ 'fracice', 'Sea ice fraction', 'none' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.00005,0.5)
   elemdesc=(/ 'siced', 'Sea ice depth', 'm' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_float,3,varid,0.0008,25.)
 end if
 
-if (any(outdata(:,:,47).ne.0.)) then
+if (any(outdata(:,:,48).ne.0.)) then
   elemdesc=(/ 'ocndepth', 'Ocean depth', 'm' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,1.,0.)
+  elemdesc=(/ 'ocheight', 'Ocean surface height', 'm' /)
+  Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.001,0.)
   do i=7,wlev
     write(chr,'(I2.2)') i
     elemdesc(1)='tgg'//chr
@@ -324,16 +360,10 @@ if (any(outdata(:,:,47).ne.0.)) then
     elemdesc(3)='m/s'
     Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,0.)        
   end do
-end if
-
-if (any(outdata(:,:,51+4*wlev).ne.0.)) then
   elemdesc=(/ 'tggsn4', 'Ice temperature lev 4', 'K' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
   elemdesc=(/ 'sto', 'Ice storage', 'J' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.1,0.)
-end if
-
-if (any(outdata(:,:,54+4*wlev).ne.0.)) then
   elemdesc=(/ 'uic', 'x-component ice', 'm/s' /)
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,0.)
   elemdesc=(/ 'vic', 'y-component ice', 'm/s' /)
@@ -431,142 +461,142 @@ end if
 if (any(outdata(:,:,25).ne.0.)) then
   Write(6,*) "Replacing urbansm"
   outdatab=max(0.,min(outdata(:,:,25),1.))
-  Call ncfindvarid(ncidarr(0),"urbansm",outname,varid)
+  Call ncfindvarid(ncidarr(0),"urbnsmc",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-end if
-
-if (any(outdata(:,:,26).ne.0.)) then
-  Write(6,*) "Replacing snd"
-  outdatab=max(0.,min(outdata(:,:,26),5.))
-  Call ncfindvarid(ncidarr(0),"snd",outname,varid)
+  outdatab=max(0.,min(outdata(:,:,26),1.))
+  Call ncfindvarid(ncidarr(0),"urbnsmr",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
 end if
 
 if (any(outdata(:,:,27).ne.0.)) then
+  Write(6,*) "Replacing snd"
+  outdatab=max(0.,min(outdata(:,:,27),5.))
+  Call ncfindvarid(ncidarr(0),"snd",outname,varid)
+  Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
+end if
+
+if (any(outdata(:,:,28).ne.0.)) then
   Write(6,*) "Replacing smass1/2/3"
-  outdatab=max(0.,min(outdata(:,:,27),400.))
+  outdatab=max(0.,min(outdata(:,:,28),400.))
   Call ncfindvarid(ncidarr(0),"smass1",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,28),400.))
+  outdatab=max(0.,min(outdata(:,:,29),400.))
   Call ncfindvarid(ncidarr(0),"smass2",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,29),400.))
+  outdatab=max(0.,min(outdata(:,:,30),400.))
   Call ncfindvarid(ncidarr(0),"smass3",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
   
   Write(6,*) "Replacing ssdn1/2/3"
-  outdatab=max(0.,min(outdata(:,:,30),400.))
+  outdatab=max(0.,min(outdata(:,:,31),400.))
   Call ncfindvarid(ncidarr(0),"ssdn1",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,31),400.))
+  outdatab=max(0.,min(outdata(:,:,32),400.))
   Call ncfindvarid(ncidarr(0),"ssdn2",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,32),400.))
+  outdatab=max(0.,min(outdata(:,:,33),400.))
   Call ncfindvarid(ncidarr(0),"ssdn3",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
 
   Write(6,*) "Replacing wbice1/2/3/4/5/6"
-  outdatab=max(0.,min(outdata(:,:,36),1.))
+  outdatab=max(0.,min(outdata(:,:,37),1.))
   Call ncfindvarid(ncidarr(0),"wbice1",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,37),1.))
+  outdatab=max(0.,min(outdata(:,:,38),1.))
   Call ncfindvarid(ncidarr(0),"wbice2",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,38),1.))
+  outdatab=max(0.,min(outdata(:,:,39),1.))
   Call ncfindvarid(ncidarr(0),"wbice3",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,39),1.))
+  outdatab=max(0.,min(outdata(:,:,40),1.))
   Call ncfindvarid(ncidarr(0),"wbice4",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,40),1.))
+  outdatab=max(0.,min(outdata(:,:,41),1.))
   Call ncfindvarid(ncidarr(0),"wbice5",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,41),1.))
+  outdatab=max(0.,min(outdata(:,:,42),1.))
   Call ncfindvarid(ncidarr(0),"wbice6",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
 
   Write(6,*) "Replacing snage"
-  outdatab=max(0.,min(outdata(:,:,42),20.))
+  outdatab=max(0.,min(outdata(:,:,43),20.))
   Call ncfindvarid(ncidarr(0),"snage",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
 
   Write(6,*) "Replacing sflag"
-  outdatab=max(0.,min(outdata(:,:,43),4.))
+  outdatab=max(0.,min(outdata(:,:,44),4.))
   Call ncfindvarid(ncidarr(0),"sflag",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)      
 end if
 
-if (any(outdata(:,:,33).ne.0.)) then
+if (any(outdata(:,:,34).ne.0.)) then
   Write(6,*) "Replacing tggsn1/2/3"
-  outdatab=max(100.,min(outdata(:,:,33),400.))
+  outdatab=max(100.,min(outdata(:,:,34),400.))
   Call ncfindvarid(ncidarr(0),"tggsn1",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(100.,min(outdata(:,:,34),400.))
+  outdatab=max(100.,min(outdata(:,:,35),400.))
   Call ncfindvarid(ncidarr(0),"tggsn2",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(100.,min(outdata(:,:,35),400.))
+  outdatab=max(100.,min(outdata(:,:,36),400.))
   Call ncfindvarid(ncidarr(0),"tggsn3",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
 end if
 
-if (any(outdata(:,:,44).ne.0.)) then
+if (any(outdata(:,:,45).ne.0.)) then
   Write(6,*) "Replacing swater"
-  outdatab=max(0.,min(outdata(:,:,44),130.))
+  outdatab=max(0.,min(outdata(:,:,45),130.))
   Call ncfindvarid(ncidarr(0),"swater",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
 end if
 
-if (any(outdata(:,:,45).ne.0.)) then
+if (any(outdata(:,:,46).ne.0.)) then
   Write(6,*) "Replacing fracice,siced"
-  outdatab=max(0.,min(outdata(:,:,45),1.))
+  outdatab=max(0.,min(outdata(:,:,46),1.))
   Call ncfindvarid(ncidarr(0),"fracice",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,46),50.))
+  outdatab=max(0.,min(outdata(:,:,47),50.))
   Call ncfindvarid(ncidarr(0),"siced",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
 end if
 
-if (any(outdata(:,:,47).ne.0.)) then
-  Write(6,*) "Replacing ocndepth,tgg,sal,uoc,voc"
-  outdatab=max(0.,min(outdata(:,:,47),5000.))
+if (any(outdata(:,:,48).ne.0.)) then
+  Write(6,*) "Replacing ocndepth,ocheight,tgg,sal,uoc,voc"
+  outdatab=max(0.,min(outdata(:,:,48),10000.))
   Call ncfindvarid(ncidarr(0),"ocndepth",outname,varid)
+  Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
+  outdatab=max(-60.,min(outdata(:,:,49),60.))
+  Call ncfindvarid(ncidarr(0),"ocheight",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
   do i=7,wlev
     write(chr,'(I2.2)') i
-    outdatab=max(200.,min(outdata(:,:,47+i),400.))
+    outdatab=max(200.,min(outdata(:,:,49+i),400.))
     Call ncfindvarid(ncidarr(0),"tgg"//chr,outname,varid)
     Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)  
   end do
   do i=1,wlev
     write(chr,'(I2.2)') i
-    outdatab=max(0.,min(outdata(:,:,47+wlev+i),100.))
+    outdatab=max(0.,min(outdata(:,:,49+wlev+i),100.))
     Call ncfindvarid(ncidarr(0),"sal"//chr,outname,varid)
     Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-    outdatab=max(-100.,min(outdata(:,:,47+2*wlev+i),100.))
+    outdatab=max(-100.,min(outdata(:,:,49+2*wlev+i),100.))
     Call ncfindvarid(ncidarr(0),"uoc"//chr,outname,varid)
     Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-    outdatab=max(-100.,min(outdata(:,:,47+3*wlev+i),100.))
+    outdatab=max(-100.,min(outdata(:,:,49+3*wlev+i),100.))
     Call ncfindvarid(ncidarr(0),"voc"//chr,outname,varid)
     Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
   end do
-end if
-
-if (any(outdata(:,:,51+4*wlev).ne.0.)) then
   Write(6,*) "Replacing tggsn4,sto"
-  outdatab=max(100.,min(outdata(:,:,51+4*wlev),400.))
+  outdatab=max(100.,min(outdata(:,:,53+4*wlev),400.))
   Call ncfindvarid(ncidarr(0),"tggsn4",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(0.,min(outdata(:,:,53+4*wlev),1000.))
+  outdatab=max(0.,min(outdata(:,:,55+4*wlev),1000.))
   Call ncfindvarid(ncidarr(0),"sto",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)  
-end if
-
-if (any(outdata(:,:,51+4*wlev).ne.0.)) then
   Write(6,*) "Replacing uic,vic"
-  outdatab=max(-100.,min(outdata(:,:,54+4*wlev),100.))
+  outdatab=max(-100.,min(outdata(:,:,56+4*wlev),100.))
   Call ncfindvarid(ncidarr(0),"uic",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(-100.,min(outdata(:,:,55+4*wlev),100.))
+  outdatab=max(-100.,min(outdata(:,:,57+4*wlev),100.))
   Call ncfindvarid(ncidarr(0),"vic",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
 end if
