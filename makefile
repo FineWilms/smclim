@@ -1,6 +1,6 @@
 FF = ifort
-XFLAGS = -O -I/tools/netcdf/3.6.1/include
-LIBS = -L/tools/netcdf/3.6.1/lib -lnetcdf
+XFLAGS = -O -I/apps/netcdf/4.1.3/include
+LIBS = -L/apps/netcdf/4.1.3/lib -lnetcdf -lnetcdff
 LDFLAGS = 
 
 OBJT = smclim.o smread.o setxyz_m.o ccinterp.o readswitch.o jimcc_m.o \
