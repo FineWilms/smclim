@@ -323,7 +323,7 @@ end if
 
 if (any(outdata(:,:,45).ne.0.)) then
   elemdesc=(/ 'swater', 'Surface water', 'mm' /)
-  Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.001,65.)
+  Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.002,65.)
 end if
 
 if (any(outdata(:,:,46).ne.0.)) then
@@ -566,7 +566,7 @@ if (any(outdata(:,:,48).ne.0.)) then
   outdatab=max(0.,min(outdata(:,:,48),10000.))
   Call ncfindvarid(ncidarr(0),"ocndepth",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
-  outdatab=max(-30.,min(outdata(:,:,49),30.))
+  outdatab=max(-60.,min(outdata(:,:,49),60.))
   Call ncfindvarid(ncidarr(0),"ocheight",outname,varid)
   Call ncwritedatgen(ncidarr,outdatab,dimnum,varid)
   do i=7,wlev
