@@ -28,7 +28,7 @@ character*2 chr
 real, dimension(2), intent(in) :: lonlat
 real, dimension(ccdim(1),ccdim(2),3), intent(in) :: xyz,axyz,bxyz
 Real, dimension(1:ccdim(1),1:ccdim(2)), intent(in) :: lsmask
-Real, dimension(1:ccdim(1),1:ccdim(2),1:58+4*wlev), intent(out) :: dataout
+Real, dimension(1:ccdim(1),1:ccdim(2),1:59+4*wlev), intent(out) :: dataout
 Real, dimension(1:ccdim(1),1:ccdim(2)), intent(in) :: grid
 Real, dimension(1:ccdim(1),1:ccdim(2),1:2), intent(in) :: tlld
 Real, dimension(1:ccdim(1),1:ccdim(2),1:2) :: rlld
@@ -74,7 +74,7 @@ End do
 ! Get size of slab
 arrsize=1
 arrsize(1:2,2)=ncsize(1:2)
-Allocate(coverout(1:arrsize(1,2),1:arrsize(2,2),1:58+4*wlev))
+Allocate(coverout(1:arrsize(1,2),1:arrsize(2,2),1:59+4*wlev))
 coverout=0.
 
 ! Read data
@@ -250,64 +250,70 @@ If (nf_inq_varid(ncid,'swater',varid).EQ.nf_noerr) Then
   Call getmeta(ncid,varname,coverout(:,:,45),arrsize)
 End If
 
+If (nf_inq_varid(ncid,'ssalin',varid).EQ.nf_noerr) Then
+  Write(6,*) "Reading ssalin"
+  varname=(/ 'ssalin', 'PSU' /)
+  Call getmeta(ncid,varname,coverout(:,:,46),arrsize)
+End If
+
 If (nf_inq_varid(ncid,'fracice',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading fracice"
   varname=(/ 'fracice', 'none' /)
-  Call getmeta(ncid,varname,coverout(:,:,46),arrsize)
+  Call getmeta(ncid,varname,coverout(:,:,47),arrsize)
   Write(6,*) "Reading siced"
   varname=(/ 'siced', 'm' /)
-  Call getmeta(ncid,varname,coverout(:,:,47),arrsize)
+  Call getmeta(ncid,varname,coverout(:,:,48),arrsize)
 End If
 
 if (nf_inq_varid(ncid,'ocndepth',varid).EQ.nf_noerr) then
   write(6,*) "Reading ocndepth"
   varname=(/ 'ocndepth', 'm' /)
-  call getmeta(ncid,varname,coverout(:,:,48),arrsize)
-  varname=(/ 'ocheight', 'm' /)
   call getmeta(ncid,varname,coverout(:,:,49),arrsize)
+  varname=(/ 'ocheight', 'm' /)
+  call getmeta(ncid,varname,coverout(:,:,50),arrsize)
   write(6,*) "Reading tgg,sal,uoc,voc"
-  coverout(:,:,50:55)=coverout(:,:,7:12)
+  coverout(:,:,51:56)=coverout(:,:,7:12)
   varname(2)='K'
   do i=7,wlev
     write(chr,'(I2.2)') i
     varname(1)='tgg'//chr
-    call getmeta(ncid,varname,coverout(:,:,49+i),arrsize)
+    call getmeta(ncid,varname,coverout(:,:,50+i),arrsize)
   end do
   varname(2)='PSU'
   do i=1,wlev
     write(chr,'(I2.2)') i
     varname(1)='sal'//chr
-    call getmeta(ncid,varname,coverout(:,:,49+wlev+i),arrsize)
+    call getmeta(ncid,varname,coverout(:,:,50+wlev+i),arrsize)
   end do
   varname(2)='m/s'
   do i=1,wlev
     varname(1)='uoc'//chr
-    call getmeta(ncid,varname,coverout(:,:,49+2*wlev+i),arrsize)
+    call getmeta(ncid,varname,coverout(:,:,50+2*wlev+i),arrsize)
     varname(1)='voc'//chr
-    call getmeta(ncid,varname,coverout(:,:,49+3*wlev+i),arrsize)          
+    call getmeta(ncid,varname,coverout(:,:,50+3*wlev+i),arrsize)          
   end do
   write(6,*) "Reading tggsn4,sto"
-  coverout(:,:,50+4*wlev)=coverout(:,:,34) ! tggsn1
-  coverout(:,:,51+4*wlev)=coverout(:,:,35) ! tggsn2
-  coverout(:,:,52+4*wlev)=coverout(:,:,36) ! tggsn3
+  coverout(:,:,51+4*wlev)=coverout(:,:,34) ! tggsn1
+  coverout(:,:,52+4*wlev)=coverout(:,:,35) ! tggsn2
+  coverout(:,:,53+4*wlev)=coverout(:,:,36) ! tggsn3
   varname=(/ 'tggsn4', 'K' /)
-  call getmeta(ncid,varname,coverout(:,:,53+4*wlev),arrsize)
-  coverout(:,:,54+4*wlev)=coverout(:,:,27) ! snd    
+  call getmeta(ncid,varname,coverout(:,:,54+4*wlev),arrsize)
+  coverout(:,:,55+4*wlev)=coverout(:,:,27) ! snd    
   varname=(/ 'sto', 'J/m2' /)
-  call getmeta(ncid,varname,coverout(:,:,55+4*wlev),arrsize)
+  call getmeta(ncid,varname,coverout(:,:,56+4*wlev),arrsize)
 end if
 
 if (nf_inq_varid(ncid,'uic',varid).eq.nf_noerr) then
   write(6,*) "Reading uic,vic"
   varname=(/ 'uic', 'm/s' /)
-  call getmeta(ncid,varname,coverout(:,:,56+4*wlev),arrsize)
-  varname=(/ 'vic', 'm/s' /)
   call getmeta(ncid,varname,coverout(:,:,57+4*wlev),arrsize)
+  varname=(/ 'vic', 'm/s' /)
+  call getmeta(ncid,varname,coverout(:,:,58+4*wlev),arrsize)
 end if
 if (nf_inq_varid(ncid,'icesal',varid).eq.nf_noerr) then
   write(6,*) "Reading icesal"
   varname=(/ 'icesal', 'PSU' /)
-  call getmeta(ncid,varname,coverout(:,:,58+4*wlev),arrsize)
+  call getmeta(ncid,varname,coverout(:,:,59+4*wlev),arrsize)
 end if
 
 ncstatus=nf_close(ncid)
@@ -317,17 +323,17 @@ Do ilon=1,ncsize(1)
   Do ilat=1,ncsize(2)
     If (any(coverout(ilon,ilat,1:6).lt.0.)) coverout(ilon,ilat,1)=0.
     If (any((coverout(ilon,ilat,7:12).gt.400.).or.(coverout(ilon,ilat,7:12).lt.200.))) coverout(ilon,ilat,1)=0.
-    If (any((coverout(ilon,ilat,46:47).lt.0.))) coverout(ilon,ilat,46)=0.
-    if (any((coverout(ilon,ilat,50:49+wlev).lt.200.).or.(coverout(ilon,ilat,50:49+wlev).gt.400.))) coverout(ilon,ilat,48)=0.
-    if (any((coverout(ilon,ilat,50+wlev:49+2*wlev).lt.0.).or.(coverout(ilon,ilat,50+wlev:49+2*wlev).gt.100.))) coverout(ilon,ilat,48)=0.
+    If (any((coverout(ilon,ilat,47:48).lt.0.))) coverout(ilon,ilat,47)=0.
+    if (any((coverout(ilon,ilat,51:50+wlev).lt.200.).or.(coverout(ilon,ilat,51:50+wlev).gt.400.))) coverout(ilon,ilat,49)=0.
+    if (any((coverout(ilon,ilat,51+wlev:50+2*wlev).lt.0.).or.(coverout(ilon,ilat,51+wlev:50+2*wlev).gt.100.))) coverout(ilon,ilat,49)=0.
     if (coverout(ilon,ilat,1).eq.0.) then
-      coverout(ilon,ilat,1:45)=0.
+      coverout(ilon,ilat,1:46)=0.
     end if
-    if (coverout(ilon,ilat,46).eq.0.) then
-      coverout(ilon,ilat,46:47)=0.
+    if (coverout(ilon,ilat,47).eq.0.) then
+      coverout(ilon,ilat,47:48)=0.
     end if
-    if (coverout(ilon,ilat,48).eq.0.) then
-      coverout(ilon,ilat,48:58+4*wlev)=0.
+    if (coverout(ilon,ilat,49).eq.0.) then
+      coverout(ilon,ilat,49:59+4*wlev)=0.
     end if
   End Do
 End Do
@@ -338,7 +344,7 @@ Do ilat=1,ncsize(2)
   aglat=smlonlat(2,1)+real(ilat-1)*(smlonlat(2,2)-smlonlat(2,1))/(smlonlat(2,3)-1.)
   Do ilon=1,ncsize(1)
 
-    If ((coverout(ilon,ilat,1).ne.0.).or.(coverout(ilon,ilat,46).ne.0.)) then
+    If ((coverout(ilon,ilat,1).ne.0.).or.(coverout(ilon,ilat,47).ne.0.)) then
 
       aglon=smlonlat(1,1)+real(ilon-1)*(smlonlat(1,2)-smlonlat(1,1))/(smlonlat(1,3)-1.)
 
@@ -347,9 +353,9 @@ Do ilat=1,ncsize(2)
       lcj = nint(alcj)
       lcj = lcj+nface*ccdim(1)
   
-      dataout(lci,lcj,1:47)=dataout(lci,lcj,1:47)+coverout(ilon,ilat,1:47)
+      dataout(lci,lcj,1:48)=dataout(lci,lcj,1:48)+coverout(ilon,ilat,1:48)
       if (coverout(ilon,ilat,1).ne.0.) countn(lci,lcj)=countn(lci,lcj)+1
-      if (coverout(ilon,ilat,46).ne.0.) countm(lci,lcj)=countm(lci,lcj)+1
+      if (coverout(ilon,ilat,47).ne.0.) countm(lci,lcj)=countm(lci,lcj)+1
     End if
     
   End Do
@@ -359,13 +365,13 @@ End Do
 Do lcj=1,ccdim(2)
   Do lci=1,ccdim(1)
     if (1-nint(lsmask(lci,lcj)).EQ.0) then
-      dataout(lci,lcj,1:45)=0.
+      dataout(lci,lcj,1:46)=0.
       countn(lci,lcj)=1
     end if
     if (1-nint(lsmask(lci,lcj)).EQ.1) then
-      dataout(lci,lcj,46:47)=0.
+      dataout(lci,lcj,47:48)=0.
       countm(lci,lcj)=1
-      dataout(lci,lcj,48:58+4*wlev)=0.
+      dataout(lci,lcj,49:59+4*wlev)=0.
       counto(lci,lcj)=1
     end If
   End Do
@@ -394,17 +400,17 @@ If (any(countn.LT.1).or.any(countm.lt.1).or.any(counto.lt.1)) then
       if (i.gt.ncsize(1)) i=i-ncsize(1)
       
       if (countn(lci,lcj).eq.0.and.coverout(i,j,1).ne.0.) then
-        dataout(lci,lcj,1:45)=coverout(i,j,1:45)
+        dataout(lci,lcj,1:46)=coverout(i,j,1:46)
         countn(lci,lcj)=1
       end if
       
       if (countm(lci,lcj).eq.0) then
-        dataout(lci,lcj,46:47)=coverout(i,j,46:47)
+        dataout(lci,lcj,47:48)=coverout(i,j,47:48)
         countm(lci,lcj)=1
       end if
         
-      if (counto(lci,lcj).eq.0.and.coverout(i,j,48).ne.0.) then
-        dataout(lci,lcj,48:58+4*wlev)=coverout(i,j,48:58+4*wlev)
+      if (counto(lci,lcj).eq.0.and.coverout(i,j,49).ne.0.) then
+        dataout(lci,lcj,49:59+4*wlev)=coverout(i,j,49:59+4*wlev)
         counto(lci,lcj)=1
       end if
 
@@ -433,7 +439,7 @@ If (Any(countn.LT.1)) then
     Do lci=1,ccdim(1)
       If (countn(lci,lcj).EQ.0) then
         call findnear(pxy,lci,lcj,sermask,rlld,ccdim)
-	    dataout(lci,lcj,1:45)=dataout(pxy(1),pxy(2),1:45)
+	    dataout(lci,lcj,1:46)=dataout(pxy(1),pxy(2),1:46)
 	    countn(lci,lcj)=countn(pxy(1),pxy(2))
       End if
     End do
@@ -450,17 +456,17 @@ End if
 If (Any(counto.LT.1)) then
   Write(6,*) "Use near nbr for water"
   allocate(sermask(ccdim(1),ccdim(2)))
-  sermask(:,:)=(counto(:,:).GT.0).AND.(dataout(:,:,48).ne.0.)
+  sermask(:,:)=(counto(:,:).GT.0).AND.(dataout(:,:,49).ne.0.)
   If (.NOT.any(sermask)) Then
     Write(6,*) "WARN: Cannot find valid ocean data"
-    dataout(:,:,48)=0.
+    dataout(:,:,49)=0.
     counto=1
   Else
     Do lcj=1,ccdim(2)
       Do lci=1,ccdim(1)
         If (counto(lci,lcj).EQ.0) then
           call findnear(pxy,lci,lcj,sermask,rlld,ccdim)
-	      dataout(lci,lcj,48:58+4*wlev)=dataout(pxy(1),pxy(2),48:58+4*wlev)
+	      dataout(lci,lcj,49:59+4*wlev)=dataout(pxy(1),pxy(2),49:59+4*wlev)
 	      counto(lci,lcj)=counto(pxy(1),pxy(2))
         End if
       End do
@@ -480,33 +486,33 @@ If (Any(countn.LT.1).or.Any(countm.LT.1).or.any(counto.lt.1)) then
   Stop
 End If
 
-Do k=1,45
+Do k=1,46
   dataout(:,:,k)=dataout(:,:,k)/Real(countn)
 End do
-Do k=46,47
+Do k=47,48
   dataout(:,:,k)=dataout(:,:,k)/Real(countm)
 End do
-Do k=48,58+4*wlev
+Do k=49,59+4*wlev
   dataout(:,:,k)=dataout(:,:,k)/Real(counto)
 End do
 
 do k=1,6
-  where(dataout(:,:,48).ne.0.) ! water
-    dataout(:,:,6+k)=dataout(:,:,49+k)
+  where(dataout(:,:,49).ne.0.) ! water
+    dataout(:,:,6+k)=dataout(:,:,50+k)
   end where
 end do
 do k=1,3
-  where(dataout(:,:,48).ne.0.) ! water
-    dataout(:,:,33+k)=dataout(:,:,49+4*wlev+k)
+  where(dataout(:,:,49).ne.0.) ! water
+    dataout(:,:,33+k)=dataout(:,:,50+4*wlev+k)
   end where
 end do
-where(dataout(:,:,48).ne.0.) ! water
-  dataout(:,:,27)=dataout(:,:,54+4*wlev)
+where(dataout(:,:,49).ne.0.) ! water
+  dataout(:,:,27)=dataout(:,:,55+4*wlev)
 end where
 
 do lcj=1,ccdim(2)
   do lci=1,ccdim(1)
-    if (dataout(lci,lcj,48).ne.0.) then
+    if (dataout(lci,lcj,49).ne.0.) then
       ! rotate current to CC coordinates
       zonx=                     -polenz*xyz(lci,lcj,2)
       zony=polenz*xyz(lci,lcj,1)-polenx*xyz(lci,lcj,3)
@@ -514,14 +520,14 @@ do lcj=1,ccdim(2)
       den=sqrt( max(zonx**2 + zony**2 + zonz**2,1.e-7) )  ! allow for poles
       costh= (zonx*axyz(lci,lcj,1)+zony*axyz(lci,lcj,2)+zonz*axyz(lci,lcj,3))/den
       sinth=-(zonx*bxyz(lci,lcj,1)+zony*bxyz(lci,lcj,2)+zonz*bxyz(lci,lcj,3))/den
-      uzon(:)=dataout(lci,lcj,50+2*wlev:49+3*wlev)
-      vmer(:)=dataout(lci,lcj,50+3*wlev:49+4*wlev)
-      dataout(lci,lcj,50+2*wlev:49+3*wlev)= costh*uzon(:)+sinth*vmer(:)
-      dataout(lci,lcj,50+3*wlev:49+4*wlev)=-sinth*uzon(:)+costh*vmer(:)
-      uzon(1)=dataout(lci,lcj,56+4*wlev)
-      vmer(1)=dataout(lci,lcj,57+4*wlev)
-      dataout(lci,lcj,56+4*wlev)= costh*uzon(1)+sinth*vmer(1)
-      dataout(lci,lcj,57+4*wlev)=-sinth*uzon(1)+costh*vmer(1)
+      uzon(:)=dataout(lci,lcj,51+2*wlev:50+3*wlev)
+      vmer(:)=dataout(lci,lcj,51+3*wlev:50+4*wlev)
+      dataout(lci,lcj,51+2*wlev:50+3*wlev)= costh*uzon(:)+sinth*vmer(:)
+      dataout(lci,lcj,51+3*wlev:50+4*wlev)=-sinth*uzon(:)+costh*vmer(:)
+      uzon(1)=dataout(lci,lcj,57+4*wlev)
+      vmer(1)=dataout(lci,lcj,58+4*wlev)
+      dataout(lci,lcj,57+4*wlev)= costh*uzon(1)+sinth*vmer(1)
+      dataout(lci,lcj,58+4*wlev)=-sinth*uzon(1)+costh*vmer(1)
     end if
   end do
 end do
