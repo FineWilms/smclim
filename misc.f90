@@ -528,44 +528,6 @@ End
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! This subroutine reads the land/sea mask from topography data
-!
-
-Subroutine gettopols(topounit,toponame,lsmsk,ecodim)
-
-Implicit None
-
-Integer, intent(in) :: topounit
-Integer, dimension(1:2), intent(in) :: ecodim
-Integer ierr,ilout
-Character(len=*), intent(in) :: toponame
-Character*47 :: dc
-Character*9 formout
-Real, dimension(1:6) :: dr
-Real, dimension(ecodim(1),ecodim(2)), intent(out) :: lsmsk
-
-ilout=Min(ecodim(1),30) ! To be compatiable with terread
-
-Open(topounit,FILE=toponame,FORM='formatted',STATUS='old',IOSTAT=ierr)
-Read(topounit,*,IOSTAT=ierr) dr(1:6),dc
-Write(formout,'("(",i3,"f7.0)")',IOSTAT=ierr) ilout
-Read(topounit,formout,IOSTAT=ierr) lsmsk ! Dummy topo data
-Write(formout,'("(",i3,"f4.1)")',IOSTAT=ierr) ilout
-Read(topounit,formout,IOSTAT=ierr) lsmsk ! Read ls mask
-Close(topounit)
-
-If (ierr.NE.0) then
-  Write(6,*) "ERROR: Cannot read file ",trim(toponame)
-  Stop
-End if
-
-lsmsk=1.-lsmsk
-
-Return
-End
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! This subroutine calculates the saturation vapor pressure
 !
 

@@ -1119,7 +1119,7 @@ Implicit None
 include 'netcdf.inc'
 
 Integer, intent(in) :: topounit
-Integer, dimension(1:2), intent(out) :: ecodim
+Integer, dimension(2), intent(out) :: ecodim
 Integer ierr,ncid,varid
 Character(len=*), intent(in) :: toponame
 Character*47, intent(out) :: header
@@ -1146,6 +1146,56 @@ else
     Stop
   End if
 end if
+
+Return
+End
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! This subroutine reads the land/sea mask from topography data
+!
+
+Subroutine gettopols(topounit,toponame,lsmsk,ecodim)
+
+Implicit None
+
+include 'netcdf.inc'
+
+Integer, intent(in) :: topounit
+Integer, dimension(2), intent(in) :: ecodim
+integer, dimension(2) :: spos,npos
+Integer ierr,ilout,varid,ncid
+Character(len=*), intent(in) :: toponame
+Character*47 :: dc
+Character*9 formout
+Real, dimension(6) :: dr
+Real, dimension(ecodim(1),ecodim(2)), intent(out) :: lsmsk
+
+ierr=nf_open(toponame,nf_nowrite,ncid)
+if (ierr==0) then
+  spos=1
+  npos(1)=ecodim(1)
+  npos(2)=ecodim(2)
+  ierr=nf_inq_varid(ncid,'lsm',varid)
+  ierr=nf_get_vara_real(ncid,varid,spos,npos,lsmsk)
+  ierr=nf_close(ncid)
+else
+  ilout=Min(ecodim(1),30) ! To be compatiable with terread
+
+  Open(topounit,FILE=toponame,FORM='formatted',STATUS='old',IOSTAT=ierr)
+  Read(topounit,*,IOSTAT=ierr) dr(1:6),dc
+  Write(formout,'("(",i3,"f7.0)")',IOSTAT=ierr) ilout
+  Read(topounit,formout,IOSTAT=ierr) lsmsk ! Dummy topo data
+  Write(formout,'("(",i3,"f4.1)")',IOSTAT=ierr) ilout
+  Read(topounit,formout,IOSTAT=ierr) lsmsk ! Read ls mask
+  Close(topounit)
+end if
+
+If (ierr/=0) then
+  Write(6,*) "ERROR: Cannot read file ",trim(toponame)
+  Stop
+End if
+
+lsmsk=1.-lsmsk
 
 Return
 End
