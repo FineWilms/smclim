@@ -8,6 +8,20 @@
 
 Subroutine ncinit(ncidarr,outfile,dimnum,dimvar,outputunit,adate)
 
+Integer, dimension(1:3), intent(in) :: dimnum
+Integer, dimension(0:4), intent(out) :: ncidarr
+Integer, dimension(1:4), intent(out) :: dimvar
+Integer, dimension(1:6), intent(in) :: adate
+Character(len=*), dimension(1:2), intent(in) :: outputunit
+Character(len=*), intent(in) :: outfile
+
+call ncinitgen(ncidarr,outfile,dimnum,dimvar,outputunit,adate,'even')
+
+return
+end
+
+Subroutine ncinitgen(ncidarr,outfile,dimnum,dimvar,outputunit,adate,latsp)
+
 Implicit None
 
 Include "netcdf.inc"
@@ -16,7 +30,7 @@ Integer, dimension(1:3), intent(in) :: dimnum
 Integer, dimension(0:4), intent(out) :: ncidarr
 Integer, dimension(1:4), intent(out) :: dimvar
 Integer, dimension(1:6), intent(in) :: adate
-Character(len=*), intent(in) :: outfile
+Character(len=*), intent(in) :: outfile,latsp
 Character(len=*), dimension(1:2), intent(in) :: outputunit
 Integer status,i,j,strlen
 Integer, dimension(1:4) :: dims
@@ -41,6 +55,7 @@ desc(4,:)=(/ "time", "time",      "hours",         "even" /)
 
 desc(3,1)=outputunit(1)
 desc(3,3)=outputunit(2)
+desc(2,4)=latsp
 
 If (adate(1).NE.0) then
   Write(timedesc,'("hours since ",I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2)') adate(:)
@@ -501,6 +516,81 @@ End If
 Return
 End
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! This subroutine stores lon, lat, lvl data (array version)
+!
+
+Subroutine nclonlatarr(ncidarr,dimid,alonlat,latarr,alvl,atime,dimnum)
+
+Implicit None
+
+Include "netcdf.inc"
+
+Integer, dimension(0:4), intent(in) :: ncidarr
+Integer, dimension(1:4), intent(in) :: dimid
+Integer, dimension(1:4), intent(in) :: dimnum
+Real, dimension(1:3), intent(in) :: alonlat
+real, dimension(1:dimnum(2)), intent(in) :: latarr
+Real, dimension(1:dimnum(3)), intent(in) :: alvl
+Real, dimension(1:dimnum(4)), intent(in) :: atime
+Real, dimension(:), allocatable :: ldata
+Real sgn
+Integer i,j,status,vtype
+
+sgn=Abs(alonlat(3))
+If (alonlat(1).GT.alonlat(2)) sgn=-sgn
+Allocate(ldata(1:dimnum(1)))
+Do j=1,dimnum(1)
+  ldata(j)=alonlat(1)+sgn*Real(j-1)
+End Do
+  
+status = nf_put_vara_real(ncidarr(0),dimid(1),1,dimnum(1),ldata)
+If (status /= nf_noerr) Then
+  Write(6,*) "ERROR: Error writing lon data (",status,")"
+  Stop
+End If
+Deallocate(ldata)
+  
+status = nf_put_vara_real(ncidarr(0),dimid(2),1,dimnum(2),latarr)
+If (status /= nf_noerr) Then
+  Write(6,*) "ERROR: Error writing lat data (",status,")"
+  Stop
+End If
+
+If (dimnum(3).NE.1) Then
+  status = nf_put_vara_real(ncidarr(0),dimid(3),1,dimnum(3),alvl)
+  If (status /= nf_noerr) Then
+    Write(6,*) "ERROR: Error writing lvl data (",status,")"
+    Stop
+  End If
+End If
+
+If (dimnum(4).NE.1) Then
+  status=nf_inq_vartype(ncidarr(0),dimid(4),vtype)
+  select case(vtype)
+    case(nf_float)
+      status = nf_put_vara_real(ncidarr(0),dimid(4),1,dimnum(4),atime)
+    case(nf_int)
+      status = nf_put_vara_int(ncidarr(0),dimid(4),1,dimnum(4),nint(atime))
+    case DEFAULT
+      write(6,*) 'ERROR: Unsupported time vartype ',vtype
+      stop
+  end select
+  If (status /= nf_noerr) Then
+    Write(6,*) "ERROR: Error writing time data (",status,")"
+    Stop
+  End If
+Else
+  status = nf_put_vara_real(ncidarr(0),dimid(4),1,1,0.)
+  If (status /= nf_noerr) Then
+    Write(6,*) "ERROR: Error writing time data (",status,")"
+    Stop
+  End If
+End If
+
+Return
+End
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! This subroutine writes data to a NetCDF file (generalised ncwritedat)
@@ -687,3 +777,19 @@ End Select
 
 Return
 End
+
+subroutine ncatt(ncidarr,desc,rval)
+
+implicit none
+
+include 'netcdf.inc'
+
+integer, dimension(0:4), intent(in) :: ncidarr
+integer ncstatus
+real, intent(in) :: rval
+character(len=*), intent(in) :: desc
+
+ncstatus=nf_put_att_real(ncidarr(0),nf_global,desc,nf_real,1,rval)
+
+return
+end

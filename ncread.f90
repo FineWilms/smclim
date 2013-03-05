@@ -270,7 +270,7 @@ Do li=1,arrsize(1,2)
   Do lj=1,arrsize(2,2)
     ii(2)=lj  
     Do lk=1,arrsize(3,2)
-      ii(3)=lk
+      ii(3)=lk    
       Do ll=1,arrsize(4,2)
         ii(4)=ll
       
@@ -372,7 +372,7 @@ Return
 End
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! This subroutine returns the varid for lon, lat, lvl and tim
+! This subroutine returns the dimid for lon, lat, lvl and tim
 !
 
 Subroutine ncfinddimlen(ncid,valname,outname,valnum)
@@ -509,20 +509,20 @@ Character*80, dimension(1:maxlist,1:maxname) :: varnamelist
 Integer ncstatus,ierr,i,j
 
 varnamelist(:,:)=""
-varnamelist(1,1:3)=(/ 'u', 'U', 'zonal_wnd' /)
-varnamelist(2,1:3)=(/ 'v', 'V', 'merid_wnd' /)
-varnamelist(3,1:2)=(/ 'omega', 'W' /)
-varnamelist(4,1:3)=(/ 'temp', 'TA', 'air_temp' /)
-varnamelist(5,1:4)=(/ 'mixr', 'H', 'rh', 'mix_rto' /)
-varnamelist(6,1:3)=(/ 'zs', 'TOPO', 'topo' /)
-varnamelist(7,1:2)=(/ 'pblh', 'ZI' /)
-varnamelist(8,1:2)=(/ 'fg', 'HFLX' /)
-varnamelist(9,1:2)=(/ 'zolnd', 'ZRUF' /)
-varnamelist(10,1:2)=(/ 'alb', 'ALBEDO' /)
-varnamelist(11,1:2)=(/ 'pmsl', 'mslp' /)
-varnamelist(12,1:3)=(/ 'tss', 'sfc_temp', 'tsu' /)
-varnamelist(13,1:2)=(/ 'ps', 'sfc_pres' /)
-varnamelist(14,1:2)=(/ 'hgt', 'zht' /)
+varnamelist(1,1:3) =(/ 'u',     'U',        'zonal_wnd'          /)
+varnamelist(2,1:3) =(/ 'v',     'V',        'merid_wnd'          /)
+varnamelist(3,1:2) =(/ 'omega', 'W'                              /)
+varnamelist(4,1:3) =(/ 'temp',  'TA',       'air_temp'           /)
+varnamelist(5,1:4) =(/ 'mixr',  'H',        'rh',      'mix_rto' /)
+varnamelist(6,1:3) =(/ 'zs',    'TOPO',     'topo'               /)
+varnamelist(7,1:2) =(/ 'pblh',  'ZI'                             /)
+varnamelist(8,1:2) =(/ 'fg',    'HFLX'                           /)
+varnamelist(9,1:2) =(/ 'zolnd', 'ZRUF'                           /)
+varnamelist(10,1:2)=(/ 'alb',  'ALBEDO'                          /)
+varnamelist(11,1:2)=(/ 'pmsl', 'mslp'                            /)
+varnamelist(12,1:3)=(/ 'tss',  'sfc_temp', 'tsu'                 /)
+varnamelist(13,1:2)=(/ 'ps',   'sfc_pres'                        /)
+varnamelist(14,1:2)=(/ 'hgt',  'zht'                             /)
 
 outname=""
 
@@ -557,8 +557,8 @@ Else
   
       If (j.GT.maxname) Then
         outname=''
-	valident=-1
-	Return
+        valident=-1
+        Return
       End If
 
     End Do
@@ -1029,6 +1029,7 @@ Select Case(varname(1))
     If (outname.NE.varname(1)) Write(6,*) "Located "//trim(varname(1))//" as "//trim(outname)
     Call getncarray(ncid,outname,arrsize,arrdata)
     Call getncdata(ncid,outname,'units',inunit)
+    if (inunit.eq.'') inunit=varname(2) ! bug fix
 
 End Select
 
@@ -1103,6 +1104,48 @@ Do i=1,oldvarnum
     End If
   End If
 End Do
+
+Return
+End
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! This subroutine reads topography data
+!
+
+Subroutine readtopography(topounit,toponame,ecodim,lonlat,schmidt,dsx,header)
+
+Implicit None
+
+include 'netcdf.inc'
+
+Integer, intent(in) :: topounit
+Integer, dimension(1:2), intent(out) :: ecodim
+Integer ierr,ncid,varid
+Character(len=*), intent(in) :: toponame
+Character*47, intent(out) :: header
+Real, dimension(1:2), intent(out) :: lonlat
+Real, intent(out) :: schmidt,dsx
+
+ierr=nf_open(toponame,nf_nowrite,ncid)
+if (ierr==0) then
+  ierr=nf_get_att_real(ncid,nf_global,'lon0',lonlat(1))
+  ierr=nf_get_att_real(ncid,nf_global,'lat0',lonlat(2))
+  ierr=nf_get_att_real(ncid,nf_global,'schmidt',schmidt)
+  ierr=nf_inq_dimid(ncid,'longitude',varid)
+  ierr=nf_inq_dimlen(ncid,varid,ecodim(1))
+  ierr=nf_inq_dimid(ncid,'latitude',varid)
+  ierr=nf_inq_dimlen(ncid,varid,ecodim(2))
+  ierr=nf_close(ncid)
+else
+  Open(topounit,FILE=toponame,FORM='formatted',STATUS='old',IOSTAT=ierr)
+  Read(topounit,*,IOSTAT=ierr) ecodim(1),ecodim(2),lonlat(1),lonlat(2),schmidt,dsx,header
+  Close(topounit)
+
+  If (ierr.NE.0) then
+    Write(6,*) "ERROR: Cannot read file ",trim(toponame)
+    Stop
+  End if
+end if
 
 Return
 End

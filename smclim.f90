@@ -9,7 +9,7 @@ Integer :: nopts
 Character*80, dimension(:,:), allocatable :: options
 
 Write(6,*) 'SMCLIM - interpolate/bin climatology soil moisture/temperature on'
-Write(6,*) '         conformal-cubic grid (JUL-12)'
+Write(6,*) '         conformal-cubic grid (MAR-13)'
 
 ! Read switches
 nopts=3
