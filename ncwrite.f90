@@ -648,10 +648,12 @@ Include "netcdf.inc"
 
 Integer, dimension(0:4), intent(in) :: ncidarr
 Integer, intent(in) :: varid
-Integer, dimension(1:4), intent(in) :: startpos,dimnum
-Real, dimension(1:dimnum(1),1:dimnum(2),1:dimnum(3),1:dimnum(4)), intent(in) :: dataout
+Integer, dimension(4), intent(in) :: startpos,dimnum
+Real, dimension(dimnum(1),dimnum(2),dimnum(3),dimnum(4)), intent(in) :: dataout
+real, dimension(dimnum(1),dimnum(2),dimnum(3),dimnum(4)) :: dum
 real offset,scale
-Integer start(1:4),ncount(1:4)
+Integer, dimension(4) :: start,ncount
+integer, dimension(dimnum(1),dimnum(2),dimnum(3),dimnum(4)) :: idum
 Integer status,xtype,numofdim
 
 status = nf_inq_varndims(ncidarr(0),varid,numofdim)
@@ -674,13 +676,16 @@ ncount(1:numofdim)=dimnum(1:numofdim)
 Select Case(xtype)
 
   Case(nf_float)
-    status = nf_put_vara_real(ncidarr(0),varid,start(1:numofdim),ncount(1:numofdim),(dataout-offset)/scale)
+    dum=(dataout-offset)/scale
+    status = nf_put_vara_real(ncidarr(0),varid,start(1:numofdim),ncount(1:numofdim),dum)
 
   Case(nf_short)
-    status = nf_put_vara_int(ncidarr(0),varid,start(1:numofdim),ncount(1:numofdim),nint((dataout-offset)/scale))
+    idum=nint((dataout-offset)/scale)
+    status = nf_put_vara_int(ncidarr(0),varid,start(1:numofdim),ncount(1:numofdim),idum)
 
   Case (nf_int)
-    status = nf_put_vara_int(ncidarr(0),varid,start(1:numofdim),ncount(1:numofdim),nint((dataout-offset)/scale))
+    idum=nint((dataout-offset)/scale)
+    status = nf_put_vara_int(ncidarr(0),varid,start(1:numofdim),ncount(1:numofdim),idum)
 
   Case DEFAULT
     Write(6,*) "ERROR: Internal error in ncwritedat.  Unknown vartype ",xtype
