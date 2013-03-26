@@ -1129,8 +1129,20 @@ Real, intent(out) :: schmidt,dsx
 ierr=nf_open(toponame,nf_nowrite,ncid)
 if (ierr==0) then
   ierr=nf_get_att_real(ncid,nf_global,'lon0',lonlat(1))
+  if (ierr/=0) then
+    write(6,*) "ERROR reading lon0"
+    stop
+  end if
   ierr=nf_get_att_real(ncid,nf_global,'lat0',lonlat(2))
+  if (ierr/=0) then
+    write(6,*) "ERROR reading lat0"
+    stop
+  end if
   ierr=nf_get_att_real(ncid,nf_global,'schmidt',schmidt)
+  if (ierr/=0) then
+    write(6,*) "ERROR reading schmidt"
+    stop
+  end if
   ierr=nf_inq_dimid(ncid,'longitude',varid)
   ierr=nf_inq_dimlen(ncid,varid,ecodim(1))
   ierr=nf_inq_dimid(ncid,'latitude',varid)
@@ -1162,7 +1174,7 @@ include 'netcdf.inc'
 
 Integer, intent(in) :: topounit
 Integer, dimension(2), intent(in) :: ecodim
-integer, dimension(2) :: spos,npos
+integer, dimension(3) :: spos,npos
 Integer ierr,ilout,varid,ncid
 Character(len=*), intent(in) :: toponame
 Character*47 :: dc
@@ -1175,6 +1187,7 @@ if (ierr==0) then
   spos=1
   npos(1)=ecodim(1)
   npos(2)=ecodim(2)
+  npos(3)=1
   ierr=nf_inq_varid(ncid,'lsm',varid)
   ierr=nf_get_vara_real(ncid,varid,spos,npos,lsmsk)
   ierr=nf_close(ncid)
@@ -1185,6 +1198,68 @@ else
   Read(topounit,*,IOSTAT=ierr) dr(1:6),dc
   Write(formout,'("(",i3,"f7.0)")',IOSTAT=ierr) ilout
   Read(topounit,formout,IOSTAT=ierr) lsmsk ! Dummy topo data
+  Write(formout,'("(",i3,"f4.1)")',IOSTAT=ierr) ilout
+  Read(topounit,formout,IOSTAT=ierr) lsmsk ! Read ls mask
+  Close(topounit)
+end if
+
+If (ierr/=0) then
+  Write(6,*) "ERROR: Cannot read file ",trim(toponame)
+  Stop
+End if
+
+lsmsk=1.-lsmsk
+
+Return
+End
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! This subroutine reads the land/sea mask from topography data
+!
+
+Subroutine gettopohgt(topounit,toponame,hgt,lsmsk,ecodim)
+
+Implicit None
+
+include 'netcdf.inc'
+
+Integer, intent(in) :: topounit
+Integer, dimension(2), intent(in) :: ecodim
+integer, dimension(3) :: spos,npos
+Integer ierr,ilout,varid,ncid
+Character(len=*), intent(in) :: toponame
+Character*47 :: dc
+Character*9 formout
+Real, dimension(6) :: dr
+Real, dimension(ecodim(1),ecodim(2)), intent(out) :: hgt,lsmsk
+
+ierr=nf_open(toponame,nf_nowrite,ncid)
+if (ierr==0) then
+  spos=1
+  npos(1)=ecodim(1)
+  npos(2)=ecodim(2)
+  npos(3)=1
+  ierr=nf_inq_varid(ncid,'zs',varid)
+  if (ierr/=0) then
+    write(6,*) "ERROR reading zs ",ierr
+    stop
+  end if
+  ierr=nf_get_vara_real(ncid,varid,spos,npos,hgt)
+  if (ierr/=0) then
+    write(6,*) "ERROR reading zs ",ierr
+    stop
+  end if
+  hgt=9.80616*hgt
+  ierr=nf_inq_varid(ncid,'lsm',varid)
+  ierr=nf_get_vara_real(ncid,varid,spos,npos,lsmsk)
+  ierr=nf_close(ncid)
+else
+  ilout=Min(ecodim(1),30) ! To be compatiable with terread
+
+  Open(topounit,FILE=toponame,FORM='formatted',STATUS='old',IOSTAT=ierr)
+  Read(topounit,*,IOSTAT=ierr) dr(1:6),dc
+  Write(formout,'("(",i3,"f7.0)")',IOSTAT=ierr) ilout
+  Read(topounit,formout,IOSTAT=ierr) hgt
   Write(formout,'("(",i3,"f4.1)")',IOSTAT=ierr) ilout
   Read(topounit,formout,IOSTAT=ierr) lsmsk ! Read ls mask
   Close(topounit)

@@ -1,6 +1,6 @@
 FF = ifort
-XFLAGS = -O -I/apps/netcdf/4.1.3/include
-LIBS = -L/apps/netcdf/4.1.3/lib -lnetcdf -lnetcdff
+XFLAGS = -O -I $(NETCDF_ROOT)/include
+LIBS = -L $(NETCDF_ROOT)/lib -L $(HDF5_HOME)/lib -lnetcdf -lnetcdff -lhdf5 -lhdf5_hl
 LDFLAGS = 
 
 OBJT = smclim.o smread.o setxyz_m.o ccinterp.o readswitch.o jimcc_m.o \
@@ -16,8 +16,6 @@ clean:
 # This section gives the rules for building object modules.
 
 .SUFFIXES:.f90
-smread.o: smread.f90
-	$(FF)  -c -override-limits $(XFLAGS) $<	
 .f90.o:
 	$(FF) -c $(XFLAGS) $<
 .f.o:
