@@ -21,10 +21,13 @@ clean:
 .f.o:
 	$(FF) -c $(XFLAGS) $<
 
+# Remove mod rule from Modula 2 so GNU make doesn't get confused
+%.o : %.mod
+
 smclim.o : ccinterp.o
 smread.o : ccinterp.o
-ccinterp.o : ccinterp.f90 setxyz_m.o xyzinfo_m.o latltoij_m.o newmpar_m.o
-latltoij_m.o : latltoij_m.f90 xyzinfo_m.o newmpar_m.o
+ccinterp.o : ccinterp.f90 setxyz_m.o xyzinfo_m.o latltoij_m.o newmpar_m.o precis_m.o
+latltoij_m.o : latltoij_m.f90 xyzinfo_m.o newmpar_m.o precis_m.o
 setxyz_m.o : setxyz_m.f90 newmpar_m.o indices_m.o parm_m.o precis_m.o ind_m.o xyzinfo_m.o jimco_m.o jimcc_m.o 
 xyzinfo_m.o : xyzinfo_m.f90 precis_m.o
 newmpar_m.o : newmpar_m.f90 
