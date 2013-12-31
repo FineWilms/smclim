@@ -63,7 +63,11 @@ If (adate(1)/=0) then
 End if
 
 ! Create NetCDF file
+#ifdef usenc3
 status=nf_create(outfile,nf_clobber,ncidarr(0))
+#else
+status=nf_create(outfile,nf_netcdf4,ncidarr(0))
+#endif
 If (status /= nf_noerr) Then
   Write(6,*) "ERROR: Error opening NetCDF file (",status,")"
   Stop
@@ -173,7 +177,11 @@ Else
 End if
 
 ! Create NetCDF file
+#ifdef usenc3
 status=nf_create(outfile,nf_clobber,ncidarr(0))
+#else
+status=nf_create(outfile,nf_netcdf4,ncidarr(0))
+#endif
 If (status /= nf_noerr) Then
   Write(6,*) "ERROR: Error opening NetCDF file (",status,")"
   Stop
@@ -204,11 +212,11 @@ Do i=1,4
         Write(6,*) "ERROR: Error defining dim in NetCDF file (",status,"): ",trim(desc(i,2))
         Stop
       End If
-      status=nf_put_att_text(ncidarr(0),dimvar(i),"positive",4,"down")
-      If (status /= nf_noerr) Then
-        Write(6,*) "ERROR: Error defining dim in NetCDF file (",status,"): ",trim(desc(i,2))
-        Stop
-      End If
+      !status=nf_put_att_text(ncidarr(0),dimvar(i),"positive",4,"down")
+      !If (status /= nf_noerr) Then
+      !  Write(6,*) "ERROR: Error defining dim in NetCDF file (",status,"): ",trim(desc(i,2))
+      !  Stop
+      !End If
     End if
     
     strlen=Len_trim(desc(i,2))
@@ -490,27 +498,19 @@ If (dimnum(3)/=1) Then
   End If
 End If
 
-If (dimnum(4)/=1) Then
-  status=nf_inq_vartype(ncidarr(0),dimid(4),vtype)
-  select case(vtype)
-    case(nf_float)
-      status = nf_put_vara_real(ncidarr(0),dimid(4),1,dimnum(4),atime)
-    case(nf_int)
-      status = nf_put_vara_int(ncidarr(0),dimid(4),1,dimnum(4),nint(atime))
-    case DEFAULT
-      write(6,*) 'ERROR: Unsupported time vartype ',vtype
-      stop
-  end select
-  If (status /= nf_noerr) Then
-    Write(6,*) "ERROR: Error writing time data (",status,")"
-    Stop
-  End If
-Else
-  status = nf_put_vara_real(ncidarr(0),dimid(4),1,1,0.)
-  If (status /= nf_noerr) Then
-    Write(6,*) "ERROR: Error writing time data (",status,")"
-    Stop
-  End If
+status=nf_inq_vartype(ncidarr(0),dimid(4),vtype)
+select case(vtype)
+  case(nf_float)
+    status = nf_put_vara_real(ncidarr(0),dimid(4),1,dimnum(4),atime)
+  case(nf_int)
+    status = nf_put_vara_int(ncidarr(0),dimid(4),1,dimnum(4),nint(atime))
+  case DEFAULT
+    write(6,*) 'ERROR: Unsupported time vartype ',vtype
+    stop
+end select
+If (status /= nf_noerr) Then
+  Write(6,*) "ERROR: Error writing time data (",status,")"
+  Stop
 End If
 
 Return

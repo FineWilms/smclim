@@ -18,7 +18,7 @@ Character*80 baseunit
 baseunit=''
 
 xd(1)=x
-If (inunit.NE.outunit) Then
+If (inunit/=outunit) Then
   Call baserescale(inunit,xd,1,baseunit,1)
   Call baserescale(outunit,xd,-1,baseunit,1)
 End If
@@ -229,7 +229,7 @@ Integer i
 
 
 ! Not a simple multiplication factor.  Need to rescale point-by-point.
-If (inunit.NE.outunit) Then
+If (inunit/=outunit) Then
   baseunit=''
   Call baserescale(inunit,f,1,baseunit,asize)
   Call baserescale(outunit,f,-1,baseunit,asize)
@@ -285,7 +285,7 @@ outdate(4)=mod(outdate(4),24)
 
 maxday=0
 outdate(3)=outdate(3)+i
-Do While(outdate(3).GT.maxday)
+Do While(outdate(3)>maxday)
 
   Select Case(outdate(2))
   
@@ -294,9 +294,9 @@ Do While(outdate(3).GT.maxday)
       
     Case(2)
       maxday=28
-      If (Mod(Real(outdate(1)),4.).EQ.0.) Then
-        maxday=29
-      End If
+      If (Mod(outdate(1),4)==0)   maxday=29
+      if (mod(outdate(1),100)==0) maxday=28
+      if (mod(outdate(1),400)==0) maxday=29
 
     Case(3)
       maxday=31
@@ -334,11 +334,11 @@ Do While(outdate(3).GT.maxday)
   
   End Select
   
-  If (outdate(3).GT.maxday) Then
+  If (outdate(3)>maxday) Then
     outdate(3)=outdate(3)-maxday
     outdate(2)=outdate(2)+1
     maxday=0
-    If (outdate(2).GT.12) Then
+    If (outdate(2)>12) Then
       outdate(1)=outdate(1)+1
       outdate(2)=1
     End If
@@ -357,45 +357,21 @@ Subroutine convertlvl(arrdata,inlvl,outlvl,arrsize)
 
 Implicit None
 
-Integer, dimension(1:3), intent(in) :: arrsize
-Real, dimension(1:arrsize(1),1:arrsize(2),1:arrsize(3)), intent(in) :: inlvl
-Real, dimension(1:arrsize(3)), intent(in) :: outlvl
-Real, dimension(1:arrsize(1),1:arrsize(2),1:arrsize(3)), intent(inout) :: arrdata
-Real, dimension(1:arrsize(3)) :: tempdata
+Integer, dimension(3), intent(in) :: arrsize
+Real, dimension(arrsize(1),arrsize(2),arrsize(3)), intent(in) :: inlvl
+Real, dimension(arrsize(3)), intent(in) :: outlvl
+Real, dimension(arrsize(1),arrsize(2),arrsize(3)), intent(inout) :: arrdata
+Real, dimension(arrsize(3)) :: tempdata
 Integer i,j,k
 
-Do i=1,arrsize(1)
-  Do j=1,arrsize(2)
+Do j=1,arrsize(2)
+  Do i=1,arrsize(1)
     ! Interpolate between levels
     Do k=1,arrsize(3)
       Call lineintp(arrdata(i,j,:),inlvl(i,j,:),outlvl(k),tempdata(k),arrsize(3))
     End Do
     arrdata(i,j,:)=tempdata
   End Do
-End Do
-
-Return
-End
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! This subroutine calculates the integral of the specified array
-!
-
-Subroutine calintegrate(arrdata,xlvl,oval,num)
-
-Implicit None
-
-Integer, intent(in) :: num
-Real, dimension(1:num), intent(in) :: xlvl
-Real, dimension(1:num), intent(in) :: arrdata
-Real, intent(out) :: oval
-Integer i
-
-! variable step length?  Use Trapezoidal
-
-oval=0.
-Do i=2,num
-  oval=oval+(arrdata(i-1)+arrdata(i))*(xlvl(i)-xlvl(i-1))/2.
 End Do
 
 Return
@@ -411,20 +387,16 @@ Subroutine calsigmalevel(slvl,olvl,arrsize,tempdata)
 Implicit None
 
 Integer, dimension(1:3), intent(in) :: arrsize
-Real, dimension(1:arrsize(3)), intent(in) :: slvl
-Real, dimension(1:arrsize(1),1:arrsize(2),1:arrsize(3)), intent(out) :: olvl
-Real, dimension(1:arrsize(1),1:arrsize(2),1:arrsize(3)), intent(in) :: tempdata
-Real, dimension(1:arrsize(3)) :: ilvl
+Real, dimension(arrsize(3)), intent(in) :: slvl
+Real, dimension(arrsize(1),arrsize(2),arrsize(3)), intent(out) :: olvl
+Real, dimension(arrsize(1),arrsize(2),arrsize(3)), intent(in) :: tempdata
+Real, dimension(arrsize(3)) :: ilvl
 Integer i,j,k
 
 olvl=0.
 ilvl=Log(slvl)
-Do i=1,arrsize(1)
-  Do j=1,arrsize(2)
-    Do k=2,arrsize(3)
-      Call calintegrate(tempdata(i,j,1:k),ilvl(1:k),olvl(i,j,k),k)
-    End Do
-  End Do
+Do k=2,arrsize(3)
+  olvl(:,:,k)=olvl(:,:,k-1)+0.5*(tempdata(:,:,k-1)+tempdata(:,:,k))*(ilvl(k)-ilvl(k-1))
 End Do
 olvl=(-287./9.81)*olvl
 
@@ -442,27 +414,26 @@ Implicit None
 Integer, intent(in) :: num
 Real, intent(in) :: posout
 Real, intent(out) :: oval
-Real, dimension(1:num), intent(in) :: dataval,posin
+Real, dimension(num), intent(in) :: dataval,posin
 Integer apos(1),bpos(1)
 Real m
 
-If (posout.LT.Minval(posin)) Then
+If (posout<Minval(posin)) Then
   Write(6,*) "ERROR: Must extrapolate below lowest value"
   Stop
-Else If (posout.GT.Maxval(posin)) Then
+Else If (posout>Maxval(posin)) Then
   Write(6,*) "ERROR: Must extrapolate above highest value"
   Stop
-Else
-  ! interpolate
-  bpos=Minloc(posin,posin.GE.posout)
-  apos=Maxloc(posin,posin.LE.posout)
-  If (apos(1).EQ.bpos(1)) Then
-    oval=dataval(apos(1))
-  Else 
-    m=(dataval(bpos(1))-dataval(apos(1)))/(posin(bpos(1))-posin(apos(1)))
-    oval=m*(posout-posin(apos(1)))+dataval(apos(1))
-  End If
+end if
 
+! interpolate
+bpos=Minloc(posin,posin>=posout)
+apos=Maxloc(posin,posin<=posout)
+If (apos(1)==bpos(1)) Then
+  oval=dataval(apos(1))
+Else 
+  m=(dataval(bpos(1))-dataval(apos(1)))/(posin(bpos(1))-posin(apos(1)))
+  oval=m*(posout-posin(apos(1)))+dataval(apos(1))
 End If
 
 Return
@@ -484,22 +455,10 @@ Real b,c,d
 ! Very basic for now.  Later replace with a bicubic.
 ! Current : z = a + b x + c y + d x y
 
-If ((serlon.EQ.0.).AND.(serlat.EQ.0.)) then
-
-  ipol=dat(1,1)
-
-Else
-
-! After a lot of matrix inverse solving, it turns out that the answer is
-! trival (assuming a regular grid).
-
-  d=dat(2,2)-dat(1,2)-dat(2,1)+dat(1,1)
-  b=dat(2,1)-dat(1,1)
-  c=dat(1,2)-dat(1,1)
-
-  ipol=b*serlon+c*serlat+d*serlon*serlat+dat(1,1)
-
-Endif
+d=dat(2,2)-dat(1,2)-dat(2,1)+dat(1,1)
+b=dat(2,1)-dat(1,1)
+c=dat(1,2)-dat(1,1)
+ipol=b*serlon+c*serlat+d*serlon*serlat+dat(1,1)
 
 Return
 End
@@ -518,7 +477,7 @@ Integer ierr
 
 Read(instr,*,iostat=ierr) sr
 
-if (ierr.ne.0) then
+if (ierr/=0) then
   Write(6,*) "ERROR: String "//trim(instr)//" is not a number."
   Stop
 end if
@@ -595,48 +554,28 @@ implicit none
 integer, dimension(2), intent(out) :: pxy
 integer, dimension(2), intent(in) :: ecodim
 integer, intent(in) ::i,j
-integer nn,nxa,nxb,nya,nyb
-integer nxc,nxd
+integer ii,jj
+real minval,dismsk
 real, dimension(ecodim(1),ecodim(2),2), intent(in) :: rlld
-Real, dimension(ecodim(1),ecodim(2)) :: dismsk
 logical, dimension(ecodim(1),ecodim(2)), intent(in) :: sermsk
-logical, dimension(ecodim(1),ecodim(2)) :: xmsk
 
-nn=1
-nxa=i
-nxb=i
-nxc=i
-nxd=i
-nya=j
-nyb=j
-do while (.not.(any(sermsk(nxa:nxb,nya:nyb)).or.any(sermsk(nxc:nxd,nya:nyb))))
-  nn=nn*2
-  nxa=max(i-nn,1)
-  nxb=min(i+nn,ecodim(1))
-  nxc=min(i-nn+ecodim(1),ecodim(1))
-  nxd=max(i+nn-ecodim(1),1)
-  nya=max(j-nn,1)
-  nyb=min(j+nn,ecodim(2))
+minval=9.E9
+pxy(1)=1
+pxy(2)=1
+do jj=1,ecodim(2)
+  do ii=1,ecodim(1)
+    if (sermsk(ii,jj)) then
+      dismsk=abs(rlld(i,j,1)-rlld(ii,jj,1))
+      if (dismsk>180.) dismsk=abs(360.-dismsk)
+      dismsk=dismsk**2+(rlld(i,j,2)-rlld(ii,jj,2))**2
+      if (dismsk<minval) then
+        minval=dismsk
+        pxy(1)=ii
+        pxy(2)=jj
+      end if
+    end if
+  end do
 end do
-xmsk=.false.
-xmsk(nxa:nxb,nya:nyb)=sermsk(nxa:nxb,nya:nyb)
-if (nxc<nxd) then
-  xmsk(nxc:nxd,nya:nyb)=xmsk(nxc:nxd,nya:nyb).or.sermsk(nxc:nxd,nya:nyb)
-  nxa=min(nxa,nxc)
-  nxb=max(nxb,nxd)
-end if
-where(xmsk(nxa:nxb,nya:nyb))
-  dismsk(nxa:nxb,nya:nyb)=abs(rlld(i,j,1)-rlld(nxa:nxb,nya:nyb,1))
-end where
-where ((dismsk(nxa:nxb,nya:nyb)>180.).and.xmsk(nxa:nxb,nya:nyb))
-  dismsk(nxa:nxb,nya:nyb)=abs(360.-dismsk(nxa:nxb,nya:nyb))
-end where
-where (xmsk(nxa:nxb,nya:nyb))
-  dismsk(nxa:nxb,nya:nyb)=dismsk(nxa:nxb,nya:nyb)**2+(rlld(i,j,2)-rlld(nxa:nxb,nya:nyb,2))**2
-end where
-pxy=Minloc(dismsk(nxa:nxb,nya:nyb),xmsk(nxa:nxb,nya:nyb))
-pxy(1)=pxy(1)+nxa-1
-pxy(2)=pxy(2)+nya-1
 
 return
 end
