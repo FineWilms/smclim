@@ -15,9 +15,10 @@ Integer, intent(in) :: nopts
 Character(len=*), dimension(nopts,2), intent(inout) :: options
 Character*80 buffer
 Integer nswitch,status,lastswitch,newswitch,i
-Integer locate
+Integer locate,clen
 
-nswitch = nargs()
+!nswitch = nargs()
+nswitch = command_argument_count() + 1
 
 If (nswitch.EQ.1) then
   Call help()
@@ -25,9 +26,10 @@ End if
 
 lastswitch=-1
 Do i=1,nswitch-1
-  Call getarg(i,buffer,status)
+  !Call getarg(i,buffer,status)
+  call get_command_argument(i,buffer,clen,status)
   
-  newswitch=locate(buffer,options(:,1),nopts)
+  newswitch=locate(buffer(1:clen),options(:,1),nopts)
   If (newswitch.NE.-1) then
     If (lastswitch.NE.-1) then
       Write(6,*) "ERROR: No value for switch "//options(lastswitch,1)
@@ -35,7 +37,7 @@ Do i=1,nswitch-1
     End if
   Else
     If (lastswitch.NE.-1) then
-      options(lastswitch,2)=buffer
+      options(lastswitch,2)=buffer(1:clen)
     Else
       ! Later - Non-switches are assumed to be filenames
       Write(6,*) "ERROR: No switch specified for value "//buffer

@@ -579,3 +579,246 @@ end do
 
 return
 end
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! This subroutine fills an array (based on JLM's code from CCAM with
+! some modifications by MJT)
+!
+
+subroutine fill_cc(a_io,ik,land_in)
+      
+implicit none
+      
+integer :: nrem, i, ii, ik, iq, ind, j, n, neighb, ndiag
+integer :: iminb,imaxb,jminb,jmaxb
+integer, save :: oldik = 0
+integer, dimension(:,:), allocatable, save :: ic
+integer, dimension(0:5) :: imin,imax,jmin,jmax
+integer, dimension(0:5) :: npann,npane,npanw,npans
+real, dimension(ik*ik*6), intent(inout) :: a_io         ! input and output array
+real, dimension(ik*ik*6) :: a
+real av     
+logical, dimension(ik*ik*6), intent(in) :: land_in
+logical, dimension(ik*ik*6) :: land_a,land_b
+logical, dimension(4) :: mask
+data npann/1,103,3,105,5,101/,npane/102,2,104,4,100,0/
+data npanw/5,105,1,101,3,103/,npans/104,0,100,2,102,4/
+ind(i,j,n)=i+(j-1)*ik+n*ik*ik  ! *** for n=0,npanels
+
+land_b=land_in
+     
+if (ik/=oldik) then
+ oldik=ik
+ if (allocated(ic)) then
+   deallocate(ic)
+ end if
+ allocate(ic(4,ik*ik*6))
+ do iq=1,ik*ik*6
+   ic(1,iq)=iq+ik
+   ic(2,iq)=iq-ik
+   ic(3,iq)=iq+1
+   ic(4,iq)=iq-1
+ enddo   ! iq loop
+ do n=0,5
+  if(npann(n)<100)then
+   do ii=1,ik
+     ic(1,ind(ii,ik,n))=ind(ii,1,npann(n))
+   enddo    ! ii loop
+  else
+   do ii=1,ik
+     ic(1,ind(ii,ik,n))=ind(1,ik+1-ii,npann(n)-100)
+   enddo    ! ii loop
+  endif      ! (npann(n)<100)
+  if(npane(n)<100)then
+   do ii=1,ik
+     ic(3,ind(ik,ii,n))=ind(1,ii,npane(n))
+   enddo    ! ii loop
+  else
+   do ii=1,ik
+     ic(3,ind(ik,ii,n))=ind(ik+1-ii,1,npane(n)-100)
+   enddo    ! ii loop
+  endif      ! (npane(n)<100)
+  if(npanw(n)<100)then
+   do ii=1,ik
+     ic(4,ind(1,ii,n))=ind(ik,ii,npanw(n))
+   enddo    ! ii loop
+  else
+   do ii=1,ik
+     ic(4,ind(1,ii,n))=ind(ik+1-ii,ik,npanw(n)-100)
+   enddo    ! ii loop
+  endif      ! (npanw(n)<100)
+  if(npans(n)<100)then
+   do ii=1,ik
+     ic(2,ind(ii,1,n))=ind(ii,ik,npans(n))
+   enddo    ! ii loop
+  else
+   do ii=1,ik
+     ic(2,ind(ii,1,n))=ind(ik,ik+1-ii,npans(n)-100)
+   enddo    ! ii loop
+  endif      ! (npans(n)<100)
+ enddo      ! n loop
+end if ! oldik/=ik
+
+imin=1
+imax=ik
+jmin=1
+jmax=ik
+          
+nrem = 1    ! Just for first iteration
+do while ( nrem > 0)
+  nrem=0
+  a(:)=a_io(:)
+  land_a(:)=land_b(:)
+  do n=0,5
+    iminb=ik
+    imaxb=1
+    jminb=ik
+    jmaxb=1
+    do j=jmin(n),jmax(n)
+      do i=imin(n),imax(n)
+        iq=ind(i,j,n)
+        if(.not.land_a(iq))then
+          mask=land_a(ic(:,iq))
+          neighb=count(mask)
+          if(neighb>0)then
+            av=sum(a(ic(:,iq)),mask)
+            a_io(iq)=av/real(neighb)
+            land_b(iq)=.true.
+          else
+            iminb=min(i,iminb)
+            imaxb=max(i,imaxb)
+            jminb=min(j,jminb)
+            jmaxb=max(j,jmaxb)
+            nrem=nrem+1   ! current number of points without a neighbour
+          endif
+        endif
+      end do
+    end do
+    imin(n)=iminb
+    imax(n)=imaxb
+    jmin(n)=jminb
+    jmax(n)=jmaxb
+  end do
+end do
+return
+end
+
+subroutine fill_cc_a(a_io,ik,rng,land_in)
+      
+implicit none
+      
+integer :: nrem,i,ii,ik,iq,ind,j,n,neighb,ndiag
+integer :: iminb,imaxb,jminb,jmaxb,rng
+integer, save :: oldik = 0
+integer, dimension(:,:), allocatable, save :: ic
+integer, dimension(0:5) :: imin,imax,jmin,jmax
+integer, dimension(0:5) :: npann,npane,npanw,npans
+real, dimension(ik*ik*6,rng), intent(inout) :: a_io         ! input and output array
+real, dimension(ik*ik*6,rng) :: a
+real, dimension(rng) :: av     
+logical, dimension(ik*ik*6), intent(in) :: land_in
+logical, dimension(ik*ik*6) :: land_a,land_b
+logical, dimension(4) :: mask
+data npann/1,103,3,105,5,101/,npane/102,2,104,4,100,0/
+data npanw/5,105,1,101,3,103/,npans/104,0,100,2,102,4/
+ind(i,j,n)=i+(j-1)*ik+n*ik*ik  ! *** for n=0,npanels
+
+land_b=land_in
+     
+if (ik/=oldik) then
+ oldik=ik
+ if (allocated(ic)) then
+   deallocate(ic)
+ end if
+ allocate(ic(4,ik*ik*6))
+ do iq=1,ik*ik*6
+   ic(1,iq)=iq+ik
+   ic(2,iq)=iq-ik
+   ic(3,iq)=iq+1
+   ic(4,iq)=iq-1
+ enddo   ! iq loop
+ do n=0,5
+  if(npann(n)<100)then
+   do ii=1,ik
+     ic(1,ind(ii,ik,n))=ind(ii,1,npann(n))
+   enddo    ! ii loop
+  else
+   do ii=1,ik
+     ic(1,ind(ii,ik,n))=ind(1,ik+1-ii,npann(n)-100)
+   enddo    ! ii loop
+  endif      ! (npann(n)<100)
+  if(npane(n)<100)then
+   do ii=1,ik
+     ic(3,ind(ik,ii,n))=ind(1,ii,npane(n))
+   enddo    ! ii loop
+  else
+   do ii=1,ik
+     ic(3,ind(ik,ii,n))=ind(ik+1-ii,1,npane(n)-100)
+   enddo    ! ii loop
+  endif      ! (npane(n)<100)
+  if(npanw(n)<100)then
+   do ii=1,ik
+     ic(4,ind(1,ii,n))=ind(ik,ii,npanw(n))
+   enddo    ! ii loop
+  else
+   do ii=1,ik
+     ic(4,ind(1,ii,n))=ind(ik+1-ii,ik,npanw(n)-100)
+   enddo    ! ii loop
+  endif      ! (npanw(n)<100)
+  if(npans(n)<100)then
+   do ii=1,ik
+     ic(2,ind(ii,1,n))=ind(ii,ik,npans(n))
+   enddo    ! ii loop
+  else
+   do ii=1,ik
+     ic(2,ind(ii,1,n))=ind(ik,ik+1-ii,npans(n)-100)
+   enddo    ! ii loop
+  endif      ! (npans(n)<100)
+ enddo      ! n loop
+end if ! oldik/=ik
+
+imin=1
+imax=ik
+jmin=1
+jmax=ik
+          
+nrem = 1    ! Just for first iteration
+do while ( nrem > 0)
+  nrem=0
+  a(:,:)=a_io(:,:)
+  land_a(:)=land_b(:)
+  do n=0,5
+    iminb=ik
+    imaxb=1
+    jminb=ik
+    jmaxb=1
+    do j=jmin(n),jmax(n)
+      do i=imin(n),imax(n)
+        iq=ind(i,j,n)
+        if(.not.land_a(iq))then
+          mask=land_a(ic(:,iq))
+          neighb=count(mask)
+          if(neighb>0)then
+            do ii=1,rng
+              av(ii)=sum(a(ic(:,iq),ii),mask)
+              a_io(iq,ii)=av(ii)/real(neighb)
+            end do
+            land_b(iq)=.true.
+          else
+            iminb=min(i,iminb)
+            imaxb=max(i,imaxb)
+            jminb=min(j,jminb)
+            jmaxb=max(j,jmaxb)
+            nrem=nrem+1   ! current number of points without a neighbour
+          endif
+        endif
+      end do
+    end do
+    imin(n)=iminb
+    imax(n)=imaxb
+    jmin(n)=jminb
+    jmax(n)=jmaxb
+  end do
+end do
+return
+end
