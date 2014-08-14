@@ -80,31 +80,40 @@ coverout=0.
 ! Read data
 If (nf_inq_varid(ncid,'wetfrac1',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading wetfrac1/2/3/4/5/6"
-  varname=(/ 'wetfrac1', 'none' /)
+  varname(1)='wetfrac1'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,1),arrsize)
-  varname=(/ 'wetfrac2', 'none' /)
+  varname(1)='wetfrac2'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,2),arrsize)
-  varname=(/ 'wetfrac3', 'none' /)
+  varname(1)='wetfrac3'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,3),arrsize)
-  varname=(/ 'wetfrac4', 'none' /)
+  varname(1)='wetfrac4'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,4),arrsize)
-  varname=(/ 'wetfrac5', 'none' /)
+  varname(1)='wetfrac5'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,5),arrsize)
-  varname=(/ 'wetfrac6', 'none' /)
+  varname(1)='wetfrac6'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,6),arrsize)
 Else If ((nf_inq_varid(ncid,'wetfrac3',varid).EQ.nf_noerr).AND.(nf_inq_varid(ncid,'wetfrac5',varid).EQ.nf_noerr)) Then
   Write(6,*) "Reading wetfrac3/5"
-  varname=(/ 'wetfrac3', 'none' /)
+  varname(1)='wetfrac3'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,1),arrsize)
   coverout(:,:,2)=coverout(:,:,1)
   coverout(:,:,3)=coverout(:,:,1)
-  varname=(/ 'wetfrac5', 'none' /)
+  varname(1)='wetfrac5'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,4),arrsize)
   coverout(:,:,5)=coverout(:,:,4)
   coverout(:,:,6)=coverout(:,:,4)
 Else If (nf_inq_varid(ncid,'wetfrac',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading wetfrac"
-  varname=(/ 'wetfrac', 'none' /)
+  varname(1)='wetfrac'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,1),arrsize)
   coverout(:,:,2)=coverout(:,:,1)
   coverout(:,:,3)=coverout(:,:,1)
@@ -118,25 +127,33 @@ End If
 
 If (nf_inq_varid(ncid,'tgg1',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading tgg1/2/3/4/5/6"
-  varname=(/ 'tgg1', 'K' /)
+  varname(1)='tgg1'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,7),arrsize)
-  varname=(/ 'tgg2', 'K' /)
+  varname(1)='tgg2'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,8),arrsize)
-  varname=(/ 'tgg3', 'K' /)
+  varname(1)='tgg3'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,9),arrsize)
-  varname=(/ 'tgg4', 'K' /)
+  varname(1)='tgg4'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,10),arrsize)
-  varname=(/ 'tgg5', 'K' /)
+  varname(1)='tgg5'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,11),arrsize)
-  varname=(/ 'tgg6', 'K' /)
+  varname(1)='tgg6'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,12),arrsize)
 Else If ((nf_inq_varid(ncid,'tgg3',varid).EQ.nf_noerr).AND.(nf_inq_varid(ncid,'tgg5',varid).EQ.nf_noerr)) Then
   Write(6,*) "Reading tgg3/5"
-  varname=(/ 'tgg3', 'K' /)
+  varname(1)='tgg3'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,7),arrsize)
   coverout(:,:,8)=coverout(:,:,7)
   coverout(:,:,9)=coverout(:,:,7)
-  varname=(/ 'tgg5', 'K' /)
+  varname(1)='tgg5'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,10),arrsize)
   coverout(:,:,11)=coverout(:,:,10)
   coverout(:,:,12)=coverout(:,:,10)
@@ -147,129 +164,167 @@ End If
 
 If (nf_inq_varid(ncid,'rooftgg1',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading rooftgg1/2/3"
-  varname=(/ 'rooftgg1', 'K' /)
+  varname(1)='rooftgg1'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,13),arrsize)
-  varname=(/ 'rooftgg2', 'K' /)
+  varname(1)='rooftgg2'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,14),arrsize)
-  varname=(/ 'rooftgg3', 'K' /)
+  varname(1)='rooftgg3'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,15),arrsize)
 
   Write(6,*) "Reading waletgg1/2/3"
-  varname=(/ 'waletgg1', 'K' /)
+  varname(1)='waletgg1'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,16),arrsize)
-  varname=(/ 'waletgg2', 'K' /)
+  varname(1)='waletgg2'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,17),arrsize)
-  varname=(/ 'waletgg3', 'K' /)
+  varname(1)='waletgg3'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,18),arrsize)
 
   Write(6,*) "Reading walwtgg1/2/3"
-  varname=(/ 'walwtgg1', 'K' /)
+  varname(1)='walwtgg1'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,19),arrsize)
-  varname=(/ 'walwtgg2', 'K' /)
+  varname(1)='walwtgg2'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,20),arrsize)
-  varname=(/ 'walwtgg3', 'K' /)
+  varname(1)='walwtgg3'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,21),arrsize)
 
   Write(6,*) "Reading roadtgg1/2/3"
-  varname=(/ 'roadtgg1', 'K' /)
+  varname(1)='roadtgg1'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,22),arrsize)
-  varname=(/ 'roadtgg2', 'K' /)
+  varname(1)='roadtgg2'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,23),arrsize)
-  varname=(/ 'roadtgg3', 'K' /)
+  varname(1)='roadtgg3'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,24),arrsize)
 End If
 
 If (nf_inq_varid(ncid,'urbnsmc',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading urbansm"
-  varname=(/ 'urbnsmc', 'm3/m3' /)
+  varname(1)='urbnsmc'
+  varname(2)='m3/m3'
   Call getmeta(ncid,varname,coverout(:,:,25),arrsize)
-  varname=(/ 'urbnsmr', 'm3/m3' /)
+  varname(1)='urbnsmr'
+  varname(2)='m3/m3'
   Call getmeta(ncid,varname,coverout(:,:,26),arrsize)
 End If
 
 If (nf_inq_varid(ncid,'snd',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading snd"
-  varname=(/ 'snd', 'mm' /)
+  varname(1)='snd'
+  varname(2)='mm'
   Call getmeta(ncid,varname,coverout(:,:,27),arrsize)
 End If
 
 If (nf_inq_varid(ncid,'smass1',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading smass1/2/3"
-  varname=(/ 'smass1', 'K' /)
+  varname(1)='smass1'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,28),arrsize)
-  varname=(/ 'smass2', 'K' /)
+  varname(1)='smass2'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,29),arrsize)
-  varname=(/ 'smass3', 'K' /)
+  varname(1)='smass3'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,30),arrsize)
 
   Write(6,*) "Reading ssdn1/2/3"
-  varname=(/ 'ssdn1', 'K' /)
+  varname(1)='ssdn1'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,31),arrsize)
-  varname=(/ 'ssdn2', 'K' /)
+  varname(1)='ssdn2'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,32),arrsize)
-  varname=(/ 'ssdn3', 'K' /)
+  varname(1)='ssdn3'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,33),arrsize)
 
   Write(6,*) "Reading wbice1/2/3/4/5/6"
-  varname=(/ 'wbice1', 'm3/m3' /)
+  varname(1)='wbice1'
+  varname(2)='m3/m3'
   Call getmeta(ncid,varname,coverout(:,:,37),arrsize)
-  varname=(/ 'wbice2', 'm3/m3' /)
+  varname(1)='wbice2'
+  varname(2)='m3/m3'
   Call getmeta(ncid,varname,coverout(:,:,38),arrsize)
-  varname=(/ 'wbice3', 'm3/m3' /)
+  varname(1)='wbice3'
+  varname(2)='m3/m3'
   Call getmeta(ncid,varname,coverout(:,:,39),arrsize)
-  varname=(/ 'wbice4', 'm3/m3' /)
+  varname(1)='wbice4'
+  varname(2)='m3/m3'
   Call getmeta(ncid,varname,coverout(:,:,40),arrsize)
-  varname=(/ 'wbice5', 'm3/m3' /)
+  varname(1)='wbice5'
+  varname(2)='m3/m3'
   Call getmeta(ncid,varname,coverout(:,:,41),arrsize)
-  varname=(/ 'wbice6', 'm3/m3' /)
+  varname(1)='wbice6'
+  varname(2)='m3/m3'
   Call getmeta(ncid,varname,coverout(:,:,42),arrsize)
 
   Write(6,*) "Reading snage"
-  varname=(/ 'snage', 'none' /)
+  varname(1)='snage'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,43),arrsize)
 
   Write(6,*) "Reading sflag"
-  varname=(/ 'sflag', 'none' /)
+  varname(1)='sflag'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,44),arrsize)
 End If
 
 coverout(:,:,34:36)=272.2
 If (nf_inq_varid(ncid,'tggsn1',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading tggsn1/2/3"
-  varname=(/ 'tggsn1', 'K' /)
+  varname(1)='tggsn1'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,34),arrsize)
-  varname=(/ 'tggsn2', 'K' /)
+  varname(1)='tggsn2'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,35),arrsize)
-  varname=(/ 'tggsn3', 'K' /)
+  varname(1)='tggsn3'
+  varname(2)='K'
   Call getmeta(ncid,varname,coverout(:,:,36),arrsize)
 End If
 
 If (nf_inq_varid(ncid,'swater',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading swater"
-  varname=(/ 'swater', 'mm' /)
+  varname(1)='swater'
+  varname(2)='mm'
   Call getmeta(ncid,varname,coverout(:,:,45),arrsize)
 End If
 
 If (nf_inq_varid(ncid,'ssalin',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading ssalin"
-  varname=(/ 'ssalin', 'PSU' /)
+  varname(1)='ssalin'
+  varname(2)='PSU'
   Call getmeta(ncid,varname,coverout(:,:,46),arrsize)
 End If
 
 If (nf_inq_varid(ncid,'fracice',varid).EQ.nf_noerr) Then
   Write(6,*) "Reading fracice"
-  varname=(/ 'fracice', 'none' /)
+  varname(1)='fracice'
+  varname(2)='none'
   Call getmeta(ncid,varname,coverout(:,:,47),arrsize)
   Write(6,*) "Reading siced"
-  varname=(/ 'siced', 'm' /)
+  varname(1)='siced'
+  varname(2)='m'
   Call getmeta(ncid,varname,coverout(:,:,48),arrsize)
 End If
 
 if (nf_inq_varid(ncid,'ocndepth',varid).EQ.nf_noerr) then
   write(6,*) "Reading ocndepth"
-  varname=(/ 'ocndepth', 'm' /)
+  varname(1)='ocndepth'
+  varname(2)='m'
   call getmeta(ncid,varname,coverout(:,:,49),arrsize)
-  varname=(/ 'ocheight', 'm' /)
+  varname(1)='ocheight'
+  varname(2)='m'
   call getmeta(ncid,varname,coverout(:,:,50),arrsize)
   write(6,*) "Reading tgg,sal,uoc,voc"
   coverout(:,:,51:56)=coverout(:,:,7:12)
@@ -296,23 +351,28 @@ if (nf_inq_varid(ncid,'ocndepth',varid).EQ.nf_noerr) then
   coverout(:,:,51+4*wlev)=coverout(:,:,34) ! tggsn1
   coverout(:,:,52+4*wlev)=coverout(:,:,35) ! tggsn2
   coverout(:,:,53+4*wlev)=coverout(:,:,36) ! tggsn3
-  varname=(/ 'tggsn4', 'K' /)
+  varname(1)='tggsn4'
+  varname(2)='K'
   call getmeta(ncid,varname,coverout(:,:,54+4*wlev),arrsize)
   coverout(:,:,55+4*wlev)=coverout(:,:,27) ! snd    
-  varname=(/ 'sto', 'J/m2' /)
+  varname(1)='sto'
+  varname(2)='J/m2'
   call getmeta(ncid,varname,coverout(:,:,56+4*wlev),arrsize)
 end if
 
 if (nf_inq_varid(ncid,'uic',varid).eq.nf_noerr) then
   write(6,*) "Reading uic,vic"
-  varname=(/ 'uic', 'm/s' /)
+  varname(1)='uic'
+  varname(2)='m/s'
   call getmeta(ncid,varname,coverout(:,:,57+4*wlev),arrsize)
-  varname=(/ 'vic', 'm/s' /)
+  varname(1)='vic'
+  varname(2)='m/s'
   call getmeta(ncid,varname,coverout(:,:,58+4*wlev),arrsize)
 end if
 if (nf_inq_varid(ncid,'icesal',varid).eq.nf_noerr) then
   write(6,*) "Reading icesal"
-  varname=(/ 'icesal', 'PSU' /)
+  varname(1)='icesal'
+  varname(2)='PSU'
   call getmeta(ncid,varname,coverout(:,:,59+4*wlev),arrsize)
 end if
 
@@ -325,7 +385,8 @@ Do ilon=1,ncsize(1)
     If (any((coverout(ilon,ilat,7:12).gt.400.).or.(coverout(ilon,ilat,7:12).lt.200.))) coverout(ilon,ilat,1)=0.
     If (any((coverout(ilon,ilat,47:48).lt.0.))) coverout(ilon,ilat,47)=0.
     if (any((coverout(ilon,ilat,51:50+wlev).lt.200.).or.(coverout(ilon,ilat,51:50+wlev).gt.400.))) coverout(ilon,ilat,49)=0.
-    if (any((coverout(ilon,ilat,51+wlev:50+2*wlev).lt.0.).or.(coverout(ilon,ilat,51+wlev:50+2*wlev).gt.100.))) coverout(ilon,ilat,49)=0.
+    if (any((coverout(ilon,ilat,51+wlev:50+2*wlev).lt.0.).or.(coverout(ilon,ilat,51+wlev:50+2*wlev).gt.100.))) &
+        coverout(ilon,ilat,49)=0.
     if (coverout(ilon,ilat,1).eq.0.) then
       coverout(ilon,ilat,1:46)=0.
     end if

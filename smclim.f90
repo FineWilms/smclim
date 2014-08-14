@@ -216,132 +216,232 @@ If (ncstatus /= nf_noerr) Then
   end if
 End If
 
-elemdesc=(/ 'wetfrac1', 'Wetness fraction layer 1', 'none' /)
+elemdesc(1)='wetfrac1'
+elemdesc(2)='Wetness fraction layer 1'
+elemdesc(3)='none'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0002,0.)
-elemdesc=(/ 'wetfrac2', 'Wetness fraction layer 2', 'none' /)
+elemdesc(1)='wetfrac2'
+elemdesc(2)='Wetness fraction layer 2'
+elemdesc(3)='none'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0002,0.)
-elemdesc=(/ 'wetfrac3', 'Wetness fraction layer 3', 'none' /)
+elemdesc(1)='wetfrac3'
+elemdesc(2)='Wetness fraction layer 3'
+elemdesc(3)='none'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0002,0.)
-elemdesc=(/ 'wetfrac4', 'Wetness fraction layer 4', 'none' /)
+elemdesc(1)='wetfrac4'
+elemdesc(2)='Wetness fraction layer 4'
+elemdesc(3)='none'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0002,0.)
-elemdesc=(/ 'wetfrac5', 'Wetness fraction layer 5', 'none' /)
+elemdesc(1)='wetfrac5'
+elemdesc(2)='Wetness fraction layer 5'
+elemdesc(3)='none'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0002,0.)
-elemdesc=(/ 'wetfrac6', 'Wetness fraction layer 6', 'none' /)
+elemdesc(1)='wetfrac6'
+elemdesc(2)='Wetness fraction layer 6'
+elemdesc(3)='none'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0002,0.)
 
-elemdesc=(/ 'tgg1', 'Soil temperature lev 1', 'K' /)
+elemdesc(1)='tgg1'
+elemdesc(2)='Soil temperature lev 1'
+elemdesc(3)='K'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-elemdesc=(/ 'tgg2', 'Soil temperature lev 2', 'K' /)
+elemdesc(1)='tgg2'
+elemdesc(2)='Soil temperature lev 2'
+elemdesc(3)='K'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-elemdesc=(/ 'tgg3', 'Soil temperature lev 3', 'K' /)
+elemdesc(1)='tgg3'
+elemdesc(2)='Soil temperature lev 3'
+elemdesc(3)='K'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-elemdesc=(/ 'tgg4', 'Soil temperature lev 4', 'K' /)
+elemdesc(1)='tgg4'
+elemdesc(2)='Soil temperature lev 4'
+elemdesc(3)='K'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-elemdesc=(/ 'tgg5', 'Soil temperature lev 5', 'K' /)
+elemdesc(1)='tgg5'
+elemdesc(2)='Soil temperature lev 5'
+elemdesc(3)='K'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-elemdesc=(/ 'tgg6', 'Soil temperature lev 6', 'K' /)
+elemdesc(1)='tgg6'
+elemdesc(2)='Soil temperature lev 6'
+elemdesc(3)='K'
 Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
 
 if (any(outdata(:,:,13).ne.0.)) then
-  elemdesc=(/ 'rooftgg1', 'roof temperature lev 1', 'K' /)
+  elemdesc(1)='rooftgg1'
+  elemdesc(2)='roof temperature lev 1'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'rooftgg2', 'roof temperature lev 2', 'K' /)
+  elemdesc(1)='rooftgg2'
+  elemdesc(2)='roof temperature lev 2'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'rooftgg3', 'roof temperature lev 3', 'K' /)
+  elemdesc(1)='rooftgg3'
+  elemdesc(2)='roof temperature lev 3'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'waletgg1', 'wall temperature lev 1', 'K' /)
+  elemdesc(1)='waletgg1'
+  elemdesc(2)='wall temperature lev 1'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'waletgg2', 'wall temperature lev 2', 'K' /)
+  elemdesc(1)='waletgg2'
+  elemdesc(2)='wall temperature lev 2'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'waletgg3', 'wall temperature lev 3', 'K' /)
+  elemdesc(1)='waletgg3'
+  elemdesc(2)='wall temperature lev 3'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'walwtgg1', 'wall temperature lev 1', 'K' /)
+  elemdesc(1)='walwtgg1'
+  elemdesc(2)='wall temperature lev 1'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'walwtgg2', 'wall temperature lev 2', 'K' /)
+  elemdesc(1)='walwtgg2'
+  elemdesc(2)='wall temperature lev 2'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'walwtgg3', 'wall temperature lev 3', 'K' /)
+  elemdesc(1)='walwtgg3'
+  elemdesc(2)='wall temperature lev 3'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'roadtgg1', 'road temperature lev 1', 'K' /)
+  elemdesc(1)='roadtgg1'
+  elemdesc(2)='road temperature lev 1'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'roadtgg2', 'road temperature lev 2', 'K' /)
+  elemdesc(1)='roadtgg2'
+  elemdesc(2)='road temperature lev 2'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'roadtgg3', 'road temperature lev 3', 'K' /)
+  elemdesc(1)='roadtgg3'
+  elemdesc(2)='road temperature lev 3'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
 end if
 
 if (any(outdata(:,:,25).ne.0.)) then
-  elemdesc=(/ 'urbnsmc', 'urban canyon soil mositure', 'm3/m3' /)
+  elemdesc(1)='urbnsmc'
+  elemdesc(2)='urban canyon soil mositure'
+  elemdesc(3)='m3/m3'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0001,0.5)
-  elemdesc=(/ 'urbnsmr', 'urban roof soil mositure', 'm3/m3' /)
+  elemdesc(1)='urbnsmr'
+  elemdesc(2)='urban roof soil mositure'
+  elemdesc(3)='m3/m3'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0001,0.5)
 end if
 
 if (any(outdata(:,:,27).ne.0.)) then
-  elemdesc=(/ 'snd', 'Snow depth (liquid water)', 'mm' /)
+  elemdesc(1)='snd'
+  elemdesc(2)='Snow depth (liquid water)'
+  elemdesc(3)='mm'
   Call ncaddvargen(ncidarr,elemdesc,nf_float,3,varid,1.,0.)
 end if
 
 if (any(outdata(:,:,28).ne.0.)) then
-  elemdesc=(/ 'smass1', 'Snow mass lev 1', 'K' /)
+  elemdesc(1)='smass1'
+  elemdesc(2)='Snow mass lev 1'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.01,250.)
-  elemdesc=(/ 'smass2', 'Snow mass lev 2', 'K' /)
+  elemdesc(1)='smass2'
+  elemdesc(2)='Snow mass lev 2'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.01,250.)
-  elemdesc=(/ 'smass3', 'Snow mass lev 3', 'K' /)
+  elemdesc(1)='smass3'
+  elemdesc(2)='Snow mass lev 3'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.01,250.)
-  elemdesc=(/ 'ssdn1', 'Snow density lev 1', 'K' /)
+  elemdesc(1)='ssdn1'
+  elemdesc(2)='Snow density lev 1'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.01,250.)
-  elemdesc=(/ 'ssdn2', 'Snow density lev 2', 'K' /)
+  elemdesc(1)='ssdn2'
+  elemdesc(2)='Snow density lev 2'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.01,250.)
-  elemdesc=(/ 'ssdn3', 'Snow density lev 3', 'K' /)
+  elemdesc(1)='ssdn3'
+  elemdesc(2)='Snow density lev 3'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.01,250.)
-  elemdesc=(/ 'wbice1', 'Soil ice lev 1', 'm3/m3' /)
+  elemdesc(1)='wbice1'
+  elemdesc(2)='Soil ice lev 1'
+  elemdesc(3)='m3/m3'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0001,0.)  
-  elemdesc=(/ 'wbice2', 'Soil ice lev 2', 'm3/m3' /)
+  elemdesc(1)='wbice2'
+  elemdesc(2)='Soil ice lev 2'
+  elemdesc(3)='m3/m3'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0001,0.)  
-  elemdesc=(/ 'wbice3', 'Soil ice lev 3', 'm3/m3' /)
+  elemdesc(1)='wbice3'
+  elemdesc(2)='Soil ice lev 3'
+  elemdesc(3)='m3/m3'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0001,0.)  
-  elemdesc=(/ 'wbice4', 'Soil ice lev 4', 'm3/m3' /)
+  elemdesc(1)='wbice4'
+  elemdesc(2)='Soil ice lev 4'
+  elemdesc(3)='m3/m3'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0001,0.)  
-  elemdesc=(/ 'wbice5', 'Soil ice lev 5', 'm3/m3' /)
+  elemdesc(1)='wbice5'
+  elemdesc(2)='Soil ice lev 5'
+  elemdesc(3)='m3/m3'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0001,0.)  
-  elemdesc=(/ 'wbice6', 'Soil ice lev 6', 'm3/m3' /)
+  elemdesc(1)='wbice6'
+  elemdesc(2)='Soil ice lev 6'
+  elemdesc(3)='m3/m3'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0001,0.)  
-  elemdesc=(/ 'snage', 'Snow age', 'none' /)
+  elemdesc(1)='snage'
+  elemdesc(2)='Snow age'
+  elemdesc(3)='none'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.002,0.)
-  elemdesc=(/ 'sflag', 'Snow flag', 'none' /)
+  elemdesc(1)='sflag'
+  elemdesc(2)='Snow flag'
+  elemdesc(3)='none'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.0004,0.)
 end if
 
 if (any(outdata(:,:,34).ne.0.)) then
-  elemdesc=(/ 'tggsn1', 'Snow temperature lev 1', 'K' /)
+  elemdesc(1)='tggsn1'
+  elemdesc(2)='Snow temperature lev 1'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'tggsn2', 'Snow temperature lev 2', 'K' /)
+  elemdesc(1)='tggsn2'
+  elemdesc(2)='Snow temperature lev 2'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.) 
-  elemdesc=(/ 'tggsn3', 'Snow temperature lev 3', 'K' /)
+  elemdesc(1)='tggsn3'
+  elemdesc(2)='Snow temperature lev 3'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
 end if
 
 if (any(outdata(:,:,45).ne.0.)) then
-  elemdesc=(/ 'swater', 'Surface water depth', 'mm' /)
+  elemdesc(1)='swater'
+  elemdesc(2)='Surface water depth'
+  elemdesc(3)='mm'
   Call ncaddvargen(ncidarr,elemdesc,nf_float,3,varid,1.,0.)
 end if
 
 if (any(outdata(:,:,46).ne.0.)) then
-  elemdesc=(/ 'ssalin', 'Surface water salinity', 'PSU' /)
+  elemdesc(1)='ssalin'
+  elemdesc(2)='Surface water salinity'
+  elemdesc(3)='PSU'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.002,65.)
 end if
 
 if (any(outdata(:,:,47).ne.0.)) then
-  elemdesc=(/ 'fracice', 'Sea ice fraction', 'none' /)
+  elemdesc(1)='fracice'
+  elemdesc(2)='Sea ice fraction'
+  elemdesc(3)='none'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.00005,0.5)
-  elemdesc=(/ 'siced', 'Sea ice depth', 'm' /)
+  elemdesc(1)='siced'
+  elemdesc(2)='Sea ice depth'
+  elemdesc(3)='m'
   Call ncaddvargen(ncidarr,elemdesc,nf_float,3,varid,0.0008,25.)
 end if
 
 if (any(outdata(:,:,49).ne.0.)) then
-  elemdesc=(/ 'ocndepth', 'Ocean depth', 'm' /)
+  elemdesc(1)='ocndepth'
+  elemdesc(2)='Ocean depth'
+  elemdesc(3)='m'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,1.,0.)
-  elemdesc=(/ 'ocheight', 'Ocean surface height', 'm' /)
+  elemdesc(1)='ocheight'
+  elemdesc(2)='Ocean surface height'
+  elemdesc(3)='m'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.002,0.)
   do i=7,wlev
     write(chr,'(I2.2)') i
@@ -365,15 +465,25 @@ if (any(outdata(:,:,49).ne.0.)) then
     elemdesc(3)='m/s'
     Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,0.)        
   end do
-  elemdesc=(/ 'tggsn4', 'Ice temperature lev 4', 'K' /)
+  elemdesc(1)='tggsn4'
+  elemdesc(2)='Ice temperature lev 4'
+  elemdesc(3)='K'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,250.)
-  elemdesc=(/ 'sto', 'Ice storage', 'J' /)
+  elemdesc(1)='sto'
+  elemdesc(2)='Ice storage'
+  elemdesc(3)='J'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.1,0.)
-  elemdesc=(/ 'uic', 'x-component ice', 'm/s' /)
+  elemdesc(1)='uic'
+  elemdesc(2)='x-component ice'
+  elemdesc(3)='m/s'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,0.)
-  elemdesc=(/ 'vic', 'y-component ice', 'm/s' /)
+  elemdesc(1)='vic'
+  elemdesc(2)='y-component ice'
+  elemdesc(3)='m/s'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,0.)
-  elemdesc=(/ 'icesal', 'Ice salinity', 'PSU' /)
+  elemdesc(1)='icesal'
+  elemdesc(2)='Ice salinity'
+  elemdesc(3)='PSU'
   Call ncaddvargen(ncidarr,elemdesc,nf_short,3,varid,0.005,50.)
 end if
 
