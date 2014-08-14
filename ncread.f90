@@ -19,7 +19,10 @@ Character*80 outname
 Character*4, dimension(4) :: varnamelist
 Integer ncstatus,i
 
-varnamelist(:)=(/ "lon", "lat", "lev", "time" /)
+varnamelist(1)="lon"
+varnamelist(2)="lat"
+varnamelist(3)="lev"
+varnamelist(4)="time"
 Do i=1,4
   Call ncfinddimlen(ncid,varnamelist(i),outname,ncdim(i))
 Enddo
@@ -147,13 +150,15 @@ Select Case(mthlab)
 End Select
 
 If (datearray(2).EQ.-1) then
-  Read(timedate,'(I4.4,A1,I2.2,A1,I2.2,A1,I2.2,A1,I2.2,A1,I2.2)',iostat=ierr) datearray(1),tmp1,datearray(2),tmp2,datearray(3),tmp3,datearray(4),tmp4,datearray(5),tmp5,datearray(6)
+  Read(timedate,'(I4.4,A1,I2.2,A1,I2.2,A1,I2.2,A1,I2.2,A1,I2.2)',iostat=ierr) datearray(1),tmp1,datearray(2),tmp2,datearray(3), &
+      tmp3,datearray(4),tmp4,datearray(5),tmp5,datearray(6)
   if (ierr.ne.0) then
     Read(timedate,'(I4.4,A1,I1.1,A1,I1.1)',iostat=ierr) datearray(1),tmp1,datearray(2),tmp2,datearray(3)
     datearray(4:6)=0
   end if
 Else  
-  Read(timedate,'(I2.2,A5,I4.4,A1,I2.2,A1,I2.2,A1,I2.2,A1,I2.2)',iostat=ierr) datearray(3),tmp6,datearray(1),tmp3,datearray(4),tmp4,datearray(5),tmp5,datearray(6)  
+  Read(timedate,'(I2.2,A5,I4.4,A1,I2.2,A1,I2.2,A1,I2.2,A1,I2.2)',iostat=ierr) datearray(3),tmp6,datearray(1),tmp3,datearray(4), &
+      tmp4,datearray(5),tmp5,datearray(6)  
 End If
 
 if (ierr.ne.0) then
@@ -509,20 +514,41 @@ Character*80, dimension(1:maxlist,1:maxname) :: varnamelist
 Integer ncstatus,ierr,i,j
 
 varnamelist(:,:)=""
-varnamelist(1,1:3) =(/ 'u',     'U',        'zonal_wnd'          /)
-varnamelist(2,1:3) =(/ 'v',     'V',        'merid_wnd'          /)
-varnamelist(3,1:2) =(/ 'omega', 'W'                              /)
-varnamelist(4,1:3) =(/ 'temp',  'TA',       'air_temp'           /)
-varnamelist(5,1:4) =(/ 'mixr',  'H',        'rh',      'mix_rto' /)
-varnamelist(6,1:3) =(/ 'zs',    'TOPO',     'topo'               /)
-varnamelist(7,1:2) =(/ 'pblh',  'ZI'                             /)
-varnamelist(8,1:2) =(/ 'fg',    'HFLX'                           /)
-varnamelist(9,1:2) =(/ 'zolnd', 'ZRUF'                           /)
-varnamelist(10,1:2)=(/ 'alb',  'ALBEDO'                          /)
-varnamelist(11,1:2)=(/ 'pmsl', 'mslp'                            /)
-varnamelist(12,1:3)=(/ 'tss',  'sfc_temp', 'tsu'                 /)
-varnamelist(13,1:2)=(/ 'ps',   'sfc_pres'                        /)
-varnamelist(14,1:2)=(/ 'hgt',  'zht'                             /)
+varnamelist(1,1)='u'
+varnamelist(1,2)='U'
+varnamelist(1,3)='zonal_wnd'
+varnamelist(2,1)='v'
+varnamelist(2,2)='V'
+varnamelist(2,3)='merid_wnd'
+varnamelist(3,1)='omega'
+varnamelist(3,2)='W'
+varnamelist(4,1)='temp'
+varnamelist(4,2)='TA'
+varnamelist(4,3)='air_temp'
+varnamelist(5,1)='mixr'
+varnamelist(5,2)='H'
+varnamelist(5,3)='rh'
+varnamelist(5,4)='mix_rto'
+varnamelist(6,1)='zs'
+varnamelist(6,2)='TOPO'
+varnamelist(6,3)='topo'
+varnamelist(7,1)='pblh'
+varnamelist(7,2)='ZI'
+varnamelist(8,1)='fg'
+varnamelist(8,2)='HFLX'
+varnamelist(9,1)='zolnd'
+varnamelist(9,2)='ZRUF'
+varnamelist(10,1)='alb'
+varnamelist(10,2)='ALBEDO'
+varnamelist(11,1)='pmsl'
+varnamelist(11,2)='mslp'
+varnamelist(12,1)='tss'
+varnamelist(12,2)='sfc_temp'
+varnamelist(12,3)='tsu'
+varnamelist(13,1)='ps'
+varnamelist(13,2)='sfc_pres'
+varnamelist(14,1)='hgt'
+varnamelist(14,2)='zht'
 
 outname=""
 
@@ -607,11 +633,16 @@ Character*80, dimension(1:4,1:maxname) :: varnamelist
 Integer ncstatus,ierr,i,j
 
 varnamelist(:,:)=""
-varnamelist(:,1)=(/ "lon", "lat", "lev", "time" /)
-varnamelist(:,2)=(/ "longitude", "latitude", "level", "" /)
-varnamelist(:,3)=(/ "", "", "pres", "" /)
-varnamelist(:,4)=(/ "", "", "lvl", "" /)
-varnamelist(:,5)=(/ "", "", "sigma_level", "" /)
+varnamelist(1,1)="lon"
+varnamelist(2,1)="lat"
+varnamelist(3,1)="lev"
+varnamelist(4,1)="time"
+varnamelist(1,2)="longitude"
+varnamelist(2,2)="latitude"
+varnamelist(3,2)="level"
+varnamelist(3,3)="pres"
+varnamelist(3,4)="lvl"
+varnamelist(3,5)="sigma_level"
 
 ncstatus = nf_inq_dimid(ncid,valname,valident)
 If (ncstatus.EQ.nf_noerr) Then
@@ -703,7 +734,7 @@ Do it=2,ncdim(4)
     itop=Maxloc(arrdata(1,1,:))
     ibot=Minloc(arrdata(1,1,:))
     outlvl(ibot)=0.
-    outlvl(itop)=9999999999
+    outlvl(itop)=9999999
   End If
    
   ! Calculate average levels
@@ -926,7 +957,8 @@ If (utype.NE.otype) Then
       dotpresdata=dotpresdata/864. ! Convert to Pa/s
       Call getncval(ncid,'lev',sigmalvl,arrsize(3,2))
       Do k=1,arrsize(3,2)
-	    arrdata(:,:,k,:)=(arrdata(:,:,k,:)-sigmalvl(k)*dotpresdata(:,:,1,:))*(-287./9.81)*tempdata(:,:,k,:)/(sigmalvl(k)*presdata(:,:,1,:))
+	    arrdata(:,:,k,:)=(arrdata(:,:,k,:)-sigmalvl(k)*dotpresdata(:,:,1,:))*(-287./9.81)*tempdata(:,:,k,:) &
+            /(sigmalvl(k)*presdata(:,:,1,:))
       End Do
   
     Case DEFAULT
@@ -1003,7 +1035,8 @@ Select Case(varname(1))
         If (arrsize(3,2).EQ.1) Then
 	  Write(6,*) "WARN: Using topography to calculate surface"
 	  Write(6,*) "      geopotential height."
-	  chartemp=(/ outname, 'm' /)
+	  chartemp(1)=outname
+      chartemp(2)='m'
 	  call getncarray(ncid,outname,arrsize,arrdata)
 	  arrdata=arrdata*9.80616
 	  inunit='m2/s2'

@@ -48,10 +48,22 @@ vardesc(2)="long_name"
 vardesc(3)="units"
 vardesc(4)="point_spacing"
 
-desc(1,:)=(/ "lon",  "longitude", "degrees_east",  "even" /)
-desc(2,:)=(/ "lat",  "latitude",  "degrees_north", "even" /)
-desc(3,:)=(/ "lev",  "level",     "layer",         "uneven" /)
-desc(4,:)=(/ "time", "time",      "hours",         "even" /)
+desc(1,1)="lon"
+desc(1,2)="longitude"
+desc(1,3)="degrees_east"
+desc(1,4)="even"
+desc(2,1)="lat"
+desc(2,2)="latitude"
+desc(2,3)="degrees_north"
+desc(2,4)="even"
+desc(3,1)="lev"
+desc(3,2)="level"
+desc(3,3)="layer"
+desc(3,4)="uneven"
+desc(4,1)="time"
+desc(4,2)="time"
+desc(4,3)="hours"
+desc(4,4)="even"
 
 desc(3,1)=outputunit(1)
 desc(3,3)=outputunit(2)
@@ -160,10 +172,18 @@ ncidarr=0
 dims(1:3)=dimnum(1:3)
 dims(4)=nf_unlimited
 
-desc(1,:)=(/ "longitude", "degrees_east",  "even" /)
-desc(2,:)=(/ "latitude",  "degrees_north", "even" /)
-desc(3,:)=(/ "lev",       "sigma_level",   "uneven" /)
-desc(4,:)=(/ "time",      "---",           "even" /)
+desc(1,1)="longitude"
+desc(1,2)="degrees_east"
+desc(1,3)="even"
+desc(2,1)="latitude"
+desc(2,2)="degrees_north"
+desc(2,3)="even"
+desc(3,1)="lev"
+desc(3,2)="sigma_level"
+desc(3,3)="uneven"
+desc(4,1)="time"
+desc(4,2)="---"
+desc(4,3)="even"
 
 If (adate(1).NE.0) then
   Write(timedesc,'("minutes since ",I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2)') adate(:)
