@@ -753,7 +753,7 @@ Deallocate(arrdata)
 ! Round levels
 Do i=1,ncdim(3)
   holdlvl=outlvl(i)
-  x=Int(Log10(outlvl(i))-1.)
+  x=Int(Log10(outlvl(i))-2.)
   If (x.LT.0.) x=0.
   x=10**x
   outlvl(i)=Nint(outlvl(i)/x)*x
