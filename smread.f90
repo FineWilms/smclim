@@ -396,9 +396,9 @@ Do ilon=1,ncsize(1)
     If (any(coverout(ilon,ilat,1:6).lt.0.)) coverout(ilon,ilat,1)=0.
     If (any((coverout(ilon,ilat,7:12).gt.400.).or.(coverout(ilon,ilat,7:12).lt.200.))) coverout(ilon,ilat,1)=0.
     If (any((coverout(ilon,ilat,51:52).lt.0.))) coverout(ilon,ilat,51)=0.
-    if (any((coverout(ilon,ilat,55:54+wlev).lt.200.).or.(coverout(ilon,ilat,55:54+wlev).gt.400.))) coverout(ilon,ilat,54)=0.
+    if (any((coverout(ilon,ilat,55:54+wlev).lt.200.).or.(coverout(ilon,ilat,55:54+wlev).gt.400.))) coverout(ilon,ilat,53)=0.
     if (any((coverout(ilon,ilat,55+wlev:54+2*wlev).lt.0.).or.(coverout(ilon,ilat,55+wlev:54+2*wlev).gt.100.))) &
-        coverout(ilon,ilat,54)=0.
+        coverout(ilon,ilat,53)=0.
     if (coverout(ilon,ilat,1).eq.0.) then
       coverout(ilon,ilat,1:50)=0.
     end if
@@ -482,7 +482,7 @@ If (any(countn.LT.1).or.any(countm.lt.1).or.any(counto.lt.1)) then
         countm(lci,lcj)=1
       end if
         
-      if (counto(lci,lcj).eq.0.and.coverout(i,j,49)/=0.) then
+      if (counto(lci,lcj).eq.0.and.coverout(i,j,53)/=0.) then
         dataout(lci,lcj,53:63+4*wlev)=coverout(i,j,53:63+4*wlev)
         counto(lci,lcj)=1
       end if
