@@ -385,7 +385,7 @@ if (nf_inq_varid(ncid,'icesal',varid).eq.nf_noerr) then
   write(6,*) "Reading icesal"
   varname(1)='icesal'
   varname(2)='PSU'
-  call getmeta(ncid,varname,coverout(:,:,67+4*wlev),arrsize)
+  call getmeta(ncid,varname,coverout(:,:,63+4*wlev),arrsize)
 end if
 
 ncstatus=nf_close(ncid)
@@ -406,7 +406,7 @@ Do ilon=1,ncsize(1)
       coverout(ilon,ilat,51:52)=0.
     end if
     if (coverout(ilon,ilat,53).eq.0.) then
-      coverout(ilon,ilat,53:67+4*wlev)=0.
+      coverout(ilon,ilat,53:63+4*wlev)=0.
     end if
   End Do
 End Do
@@ -444,7 +444,7 @@ Do lcj=1,ccdim(2)
     if (1-nint(lsmask(lci,lcj)).EQ.1) then
       dataout(lci,lcj,51:52)=0.
       countm(lci,lcj)=1
-      dataout(lci,lcj,53:67+4*wlev)=0.
+      dataout(lci,lcj,53:63+4*wlev)=0.
       counto(lci,lcj)=1
     end If
   End Do
@@ -483,7 +483,7 @@ If (any(countn.LT.1).or.any(countm.lt.1).or.any(counto.lt.1)) then
       end if
         
       if (counto(lci,lcj).eq.0.and.coverout(i,j,49)/=0.) then
-        dataout(lci,lcj,53:67+4*wlev)=coverout(i,j,53:67+4*wlev)
+        dataout(lci,lcj,53:63+4*wlev)=coverout(i,j,53:63+4*wlev)
         counto(lci,lcj)=1
       end if
 
@@ -539,7 +539,7 @@ If (Any(counto.LT.1)) then
       Do lci=1,ccdim(1)
         If (counto(lci,lcj).EQ.0) then
           call findnear(pxy,lci,lcj,sermask,rlld,ccdim)
-	      dataout(lci,lcj,53:67+4*wlev)=dataout(pxy(1),pxy(2),53:67+4*wlev)
+	      dataout(lci,lcj,53:63+4*wlev)=dataout(pxy(1),pxy(2),53:63+4*wlev)
 	      counto(lci,lcj)=counto(pxy(1),pxy(2))
         End if
       End do
@@ -565,7 +565,7 @@ End do
 Do k=51,52
   dataout(:,:,k)=dataout(:,:,k)/Real(countm)
 End do
-Do k=53,67+4*wlev
+Do k=53,63+4*wlev
   dataout(:,:,k)=dataout(:,:,k)/Real(counto)
 End do
 
