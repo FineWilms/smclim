@@ -76,7 +76,7 @@ End if
 
 ! Create NetCDF file
 #ifdef usenc3
-status=nf_create(outfile,nf_clobber,ncidarr(0))
+status=nf_create(outfile,nf_64bit_offset,ncidarr(0))
 #else
 status=nf_create(outfile,nf_netcdf4,ncidarr(0))
 #endif
@@ -198,7 +198,7 @@ End if
 
 ! Create NetCDF file
 #ifdef usenc3
-status=nf_create(outfile,nf_clobber,ncidarr(0))
+status=nf_create(outfile,nf_64bit_offset,ncidarr(0))
 #else
 status=nf_create(outfile,nf_netcdf4,ncidarr(0))
 #endif
@@ -288,7 +288,9 @@ Character(len=*), dimension(1:3), intent(in) :: elemdesc
 Integer, dimension(1:numdim) :: dimtype
 Integer strlen,ierr
 Integer status
+integer*2, dimension(1) :: ivals2
 Real, intent(in) :: sc,of
+real, dimension(1) :: rvals
 
 Select Case (numdim)
   Case(2)
@@ -337,23 +339,26 @@ End If
 !
 
 if (numtype==nf_short) then
-  status=nf_put_att_int2(ncidarr(0),varid,"valid_min",nf_int2,1,-32500)
+  ivals2=-32500
+  status=nf_put_att_int2(ncidarr(0),varid,"valid_min",nf_int2,1,ivals2)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error defining var in NetCDF file (",status,"): ",trim(elemdesc(1))
     Stop
   End If
-  status=nf_put_att_int2(ncidarr(0),varid,"valid_max",nf_int2,1,32500)
+  ivals2=32500
+  status=nf_put_att_int2(ncidarr(0),varid,"valid_max",nf_int2,1,ivals2)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error defining var in NetCDF file (",status,"): ",trim(elemdesc(1))
     Stop
   End If
-  status=nf_put_att_real(ncidarr(0),varid,"add_offset",nf_float,1,of)
+  rvals=of
+  status=nf_put_att_real(ncidarr(0),varid,"add_offset",nf_float,1,rvals)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error defining var in NetCDF file (",status,"): ",trim(elemdesc(1))
   Stop
   End If
-
-  status=nf_put_att_real(ncidarr(0),varid,"scale_factor",nf_float,1,sc)
+  rvals=sc
+  status=nf_put_att_real(ncidarr(0),varid,"scale_factor",nf_float,1,rvals)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error defining var in NetCDF file (",status,"): ",trim(elemdesc(1))
   Stop
@@ -493,6 +498,7 @@ Real, dimension(1:dimnum(4)), intent(in) :: atime
 Real, dimension(:), allocatable :: ldata
 Real sgn
 Integer i,j,status,vtype
+integer, dimension(1) :: nstart
 
 Do i=1,2
   sgn=Abs(alonlat(3,i))
@@ -502,7 +508,8 @@ Do i=1,2
     ldata(j)=alonlat(1,i)+sgn*Real(j-1)
   End Do
   
-  status = nf_put_vara_real(ncidarr(0),dimid(i),1,dimnum(i),ldata)
+  nstart=1
+  status = nf_put_vara_real(ncidarr(0),dimid(i),nstart,dimnum(i),ldata)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error writing lon and lat data (",status,")"
     Stop
@@ -511,7 +518,8 @@ Do i=1,2
 End Do
 
 If (dimnum(3)/=1) Then
-  status = nf_put_vara_real(ncidarr(0),dimid(3),1,dimnum(3),alvl)
+  nstart=1
+  status = nf_put_vara_real(ncidarr(0),dimid(3),nstart,dimnum(3),alvl)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error writing lvl data (",status,")"
     Stop
@@ -521,9 +529,11 @@ End If
 status=nf_inq_vartype(ncidarr(0),dimid(4),vtype)
 select case(vtype)
   case(nf_float)
-    status = nf_put_vara_real(ncidarr(0),dimid(4),1,dimnum(4),atime)
+    nstart=1
+    status = nf_put_vara_real(ncidarr(0),dimid(4),nstart,dimnum(4),atime)
   case(nf_int)
-    status = nf_put_vara_int(ncidarr(0),dimid(4),1,dimnum(4),nint(atime))
+    nstart=1
+    status = nf_put_vara_int(ncidarr(0),dimid(4),nstart,dimnum(4),nint(atime))
   case DEFAULT
     write(6,*) 'ERROR: Unsupported time vartype ',vtype
     stop
@@ -555,7 +565,9 @@ Real, dimension(1:dimnum(3)), intent(in) :: alvl
 Real, dimension(1:dimnum(4)), intent(in) :: atime
 Real, dimension(:), allocatable :: ldata
 Real sgn
+real, dimension(1) :: rvals
 Integer i,j,status,vtype
+integer, dimension(1) :: nstart,ncount
 
 sgn=Abs(alonlat(3))
 If (alonlat(1)>alonlat(2)) sgn=-sgn
@@ -563,22 +575,25 @@ Allocate(ldata(1:dimnum(1)))
 Do j=1,dimnum(1)
   ldata(j)=alonlat(1)+sgn*Real(j-1)
 End Do
-  
-status = nf_put_vara_real(ncidarr(0),dimid(1),1,dimnum(1),ldata)
+
+nstart=1
+status = nf_put_vara_real(ncidarr(0),dimid(1),nstart,dimnum(1),ldata)
 If (status /= nf_noerr) Then
   Write(6,*) "ERROR: Error writing lon data (",status,")"
   Stop
 End If
 Deallocate(ldata)
-  
-status = nf_put_vara_real(ncidarr(0),dimid(2),1,dimnum(2),latarr)
+
+nstart=1
+status = nf_put_vara_real(ncidarr(0),dimid(2),nstart,dimnum(2),latarr)
 If (status /= nf_noerr) Then
   Write(6,*) "ERROR: Error writing lat data (",status,")"
   Stop
 End If
 
 If (dimnum(3)/=1) Then
-  status = nf_put_vara_real(ncidarr(0),dimid(3),1,dimnum(3),alvl)
+  nstart=1
+  status = nf_put_vara_real(ncidarr(0),dimid(3),nstart,dimnum(3),alvl)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error writing lvl data (",status,")"
     Stop
@@ -589,9 +604,11 @@ If (dimnum(4)/=1) Then
   status=nf_inq_vartype(ncidarr(0),dimid(4),vtype)
   select case(vtype)
     case(nf_float)
-      status = nf_put_vara_real(ncidarr(0),dimid(4),1,dimnum(4),atime)
+      nstart=1
+      status = nf_put_vara_real(ncidarr(0),dimid(4),nstart,dimnum(4),atime)
     case(nf_int)
-      status = nf_put_vara_int(ncidarr(0),dimid(4),1,dimnum(4),nint(atime))
+      nstart=1
+      status = nf_put_vara_int(ncidarr(0),dimid(4),nstart,dimnum(4),nint(atime))
     case DEFAULT
       write(6,*) 'ERROR: Unsupported time vartype ',vtype
       stop
@@ -601,7 +618,10 @@ If (dimnum(4)/=1) Then
     Stop
   End If
 Else
-  status = nf_put_vara_real(ncidarr(0),dimid(4),1,1,0.)
+  nstart=1
+  ncount=1
+  rvals=0.
+  status = nf_put_vara_real(ncidarr(0),dimid(4),nstart,ncount,rvals)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error writing time data (",status,")"
     Stop
@@ -672,16 +692,25 @@ Integer, dimension(4), intent(in) :: startpos,dimnum
 Real, dimension(dimnum(1),dimnum(2),dimnum(3),dimnum(4)), intent(in) :: dataout
 real, dimension(dimnum(1),dimnum(2),dimnum(3),dimnum(4)) :: dum
 real offset,scale
+real, dimension(1) :: rvals
 Integer, dimension(4) :: start,ncount
 integer, dimension(dimnum(1),dimnum(2),dimnum(3),dimnum(4)) :: idum
 Integer status,xtype,numofdim
 
 status = nf_inq_varndims(ncidarr(0),varid,numofdim)
 status = nf_inq_vartype(ncidarr(0),varid,xtype)
-status = nf_get_att_real(ncidarr(0),varid,'scale_factor',scale)
-if (status.ne.nf_noerr) scale=1.
-status = nf_get_att_real(ncidarr(0),varid,'add_offset',offset)
-if (status.ne.nf_noerr) offset=0.
+status = nf_get_att_real(ncidarr(0),varid,'scale_factor',rvals(1))
+if (status.ne.nf_noerr) then
+  scale=1.
+else
+  scale=rvals(1)
+end if
+status = nf_get_att_real(ncidarr(0),varid,'add_offset',rvals(1))
+if (status.ne.nf_noerr) then
+  offset=0.
+else
+  offset=rvals(1)
+end if
 
 If (numofdim.GT.4) Then
   Write(6,*) "ERROR Max number of dimensions reached."
@@ -812,9 +841,11 @@ include 'netcdf.inc'
 integer, dimension(0:4), intent(in) :: ncidarr
 integer ncstatus
 real, intent(in) :: rval
+real, dimension(1) :: rvals
 character(len=*), intent(in) :: desc
 
-ncstatus=nf_put_att_real(ncidarr(0),nf_global,desc,nf_real,1,rval)
+rvals=rval
+ncstatus=nf_put_att_real(ncidarr(0),nf_global,desc,nf_real,1,rvals)
 
 return
 end

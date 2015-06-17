@@ -51,13 +51,13 @@ dataval=''
 
 Call ncfindvarid(ncid,varname,outname,varid)
 If (outname.EQ.'') Then
-  Write(6,*) "WARN: Cannot determine variable id ",trim(varname)," (",ncstatus,")"
+  !Write(6,*) "WARN: Cannot determine variable id ",trim(varname)," (",ncstatus,")"
   return
 End If
 
 ncstatus = nf_get_att_text(ncid,varid,datalab,dataval)
 If (ncstatus.NE.nf_noerr) Then
-  Write(6,*) "WARN: Error reading attribute ",trim(datalab)," (",ncstatus,")"
+  !Write(6,*) "WARN: Cannot read attribute ",trim(datalab)," (",ncstatus,")"
   return
 End If
 
@@ -80,15 +80,18 @@ Integer, intent(in) :: ncid
 Integer, intent(out) :: ncstatus
 Character(len=*), intent(in) :: varname,datalab
 Real, intent(out) :: dataval
+real, dimension(1) :: rvals
 Character*80 outname
 Integer varid
 
 dataval=0.
 Call ncfindvarid(ncid,varname,outname,varid)
-ncstatus = nf_get_att_real(ncid,varid,datalab,dataval)
+ncstatus = nf_get_att_real(ncid,varid,datalab,rvals(1))
+dataval=rvals(1)
 
 Return
 End
+    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! This subroutine stores (nc) dates in an array
 !
@@ -191,6 +194,7 @@ Integer, dimension(1:maxdim) :: aid,dumcount,duminx
 Integer, dimension(0:maxdim) :: ii,ij
 Real, dimension(1:arrsize(1,2),1:arrsize(2,2),1:arrsize(3,2),1:arrsize(4,2)), intent(out) :: arrdata
 Real, dimension(:,:,:,:), allocatable :: dumarr
+real, dimension(1) :: rvals
 Real scale,offset
 Character(len=*), intent(in) :: varname
 
@@ -237,7 +241,7 @@ Do i=1,ndims
   tinx=Maxloc(aid,aid.EQ.cid(i))
   inx(i)=tinx(1)
   If ((inx(i).LT.1).OR.(inx(i).GT.maxdim)) Then
-    Write(6,*) "WARN: Non-standard dimension found in ",trim(varname)
+    Write(6,*) "Non-standard dimension found in ",trim(varname)
     startpos(i)=1
     npos(i)=1
     inx(i)=0 ! ii(0) and ij(0) are set to 1.
@@ -289,14 +293,18 @@ End Do
 
 Deallocate(startpos,npos,cid,dumarr,inx)
 
-ncstatus = nf_get_att_real(ncid,varid,'scale_factor',scale)
+ncstatus = nf_get_att_real(ncid,varid,'scale_factor',rvals(1))
 If (ncstatus.NE.nf_noerr) Then
   scale=1.
+else
+  scale=rvals(1)
 End If
 
-ncstatus = nf_get_att_real(ncid,varid,'add_offset',offset)
+ncstatus = nf_get_att_real(ncid,varid,'add_offset',rvals(1))
 If (ncstatus.NE.nf_noerr) Then
   offset=0.
+else
+  offset=rvals(1)
 End If
 
 arrdata=scale*arrdata+offset
@@ -366,7 +374,7 @@ If ((vi(1).LT.1).OR.(vi(1).GT.valnum)) then
   vi=minloc(vallab,vallab.GE.rval)
 End If
 If (vallab(vi(1)).NE.rval) Then
-  Write(6,*) "WARN: Replace ",trim(valname)," ",rval," with ",vallab(vi(1))
+  Write(6,*) "Replace ",trim(valname)," ",rval," with ",vallab(vi(1))
 End If
 
 valindex=vi(1)
@@ -394,7 +402,7 @@ Integer ncstatus,valident
 
 Call ncfinddimid(ncid,valname,outname,valident)
 If (outname.EQ.'') Then
-  Write(6,*) "WARN: Cannot find dimension ",trim(valname)
+  !Write(6,*) "WARN: Cannot find dimension ",trim(valname)
   valnum=1
   Return
 End If
@@ -402,7 +410,7 @@ End If
 ! Find number of elements
 ncstatus = nf_inq_dimlen(ncid,valident,valnum)
 If (ncstatus.NE.nf_noerr) Then
-  Write(6,*) "ERROR: Cannot determine ",trim(valname)," len (",ncstatus,")"
+  Write(6,*) "ERROR: Cannot determine length of ",trim(valname)," (",ncstatus,")"
   Stop
 End If
 
@@ -455,10 +463,13 @@ Character(len=*), intent(in) :: outname
 Real, dimension(1:valnum), intent(out) :: vallab
 Character*80 actname
 Integer ncstatus,valident
+integer, dimension(1) :: nstart,ncount
 
 Call ncfindvarid(ncid,outname,actname,valident)
 
-ncstatus = nf_get_vara_real(ncid,valident,1,valnum,vallab)
+nstart=1
+ncount=valnum
+ncstatus = nf_get_vara_real(ncid,valident,nstart,ncount,vallab)
 If (ncstatus.NE.nf_noerr) Then
   Write(6,*) "ERROR: Cannot read ",trim(outname)," data (",ncstatus,")"
   Stop
@@ -810,11 +821,11 @@ If (valid.NE.-1) Then
   
   Call ncgetnumval(ncid,'tscrn','add_offset',offset,ncstatus)
   If (tempdata(1,1,0,1).EQ.offset) Then
-    Write(6,*) "WARN: tscrn is not defined at time step ",it   
+    Write(6,*) "tscrn is not defined at time step ",it   
     tempdata(:,:,0,:)=tempdata(:,:,1,:)
   End If
 Else
-  Write(6,*) "WARN: tscrn is not defined in nc file"
+  Write(6,*) "tscrn is not defined in nc file"
   tempdata(:,:,0,:)=tempdata(:,:,1,:)
 End If
 
@@ -827,11 +838,11 @@ If (valid.NE.-1) Then
   
   Call ncgetnumval(ncid,'qgscrn','add_offset',offset,ncstatus)
   If (tempdata(1,1,0,1).EQ.offset) Then
-    Write(6,*) "WARN: qgscrn is not defined at time step ",it   
+    Write(6,*) "qgscrn is not defined at time step ",it   
     mixrdata(:,:,0,:)=mixrdata(:,:,1,:)
   End If
 Else
-  Write(6,*) "WARN: qgscrn is not defined in nc file"
+  Write(6,*) "qgscrn is not defined in nc file"
   mixrdata(:,:,0,:)=mixrdata(:,:,1,:)
 End If
 
@@ -1033,8 +1044,7 @@ Select Case(varname(1))
       Call ncfindvarid(ncid,'zs',outname,valid)
       If (outname.NE.'') then
         If (arrsize(3,2).EQ.1) Then
-	  Write(6,*) "WARN: Using topography to calculate surface"
-	  Write(6,*) "      geopotential height."
+	  Write(6,*) "Using topography to calculate surface geopotential height."
 	  chartemp(1)=outname
       chartemp(2)='m'
 	  call getncarray(ncid,outname,arrsize,arrdata)
@@ -1069,12 +1079,12 @@ End Select
 !*******************************************************************
 ! Special cases (to handle bugs....)
 If ((outname.EQ.'topo').AND.(inunit.EQ.'degrees_east')) then
-  Write(6,*) "WARN: Replace topo unit degrees_east with m."
+  Write(6,*) "Replace topo unit degrees_east with m."
   inunit='m'
 End if
     
 If ((outname.EQ.'hgt').AND.(inunit.EQ.'m')) then
-  Write(6,*) "WARN: Replace hgt unit m with gpm."    
+  Write(6,*) "Replace hgt unit m with gpm."    
   inunit='gpm'
 End if
 !*******************************************************************
@@ -1158,6 +1168,7 @@ Character(len=*), intent(in) :: toponame
 Character*47, intent(out) :: header
 Real, dimension(1:2), intent(out) :: lonlat
 Real, intent(out) :: schmidt,dsx
+real, dimension(1) :: rvals
 
 ierr=nf_open(toponame,nf_nowrite,ncid)
 if (ierr==0) then
@@ -1171,11 +1182,12 @@ if (ierr==0) then
     write(6,*) "ERROR reading lat0"
     stop
   end if
-  ierr=nf_get_att_real(ncid,nf_global,'schmidt',schmidt)
+  ierr=nf_get_att_real(ncid,nf_global,'schmidt',rvals(1))
   if (ierr/=0) then
     write(6,*) "ERROR reading schmidt"
     stop
   end if
+  schmidt=rvals(1)
   ierr=nf_inq_dimid(ncid,'longitude',varid)
   ierr=nf_inq_dimlen(ncid,varid,ecodim(1))
   ierr=nf_inq_dimid(ncid,'latitude',varid)
