@@ -93,10 +93,9 @@ End
 Subroutine createsm(options,nopts)
 
 Use ccinterp
+use netcdf_m
 
 Implicit None
-
-include 'netcdf.inc'
 
 Integer, intent(in) :: nopts
 Integer, dimension(1:2) :: ccdim
@@ -169,9 +168,9 @@ End
 
 Subroutine storesm(outfile,outdata,ccdim,wlev)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 integer, intent(in) :: wlev
 integer olevid

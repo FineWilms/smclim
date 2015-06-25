@@ -9,9 +9,9 @@
 
 Subroutine getncdims(ncid,ncdim)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, intent(in) :: ncid
 Integer, dimension(4), intent(out) :: ncdim
@@ -37,9 +37,9 @@ End
 
 Subroutine getncdata(ncid,varname,datalab,dataval)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, intent(in) :: ncid
 Character(len=*), intent(in) :: varname,datalab
@@ -72,9 +72,9 @@ End
 
 Subroutine ncgetnumval(ncid,varname,datalab,dataval,ncstatus)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, intent(in) :: ncid
 Integer, intent(out) :: ncstatus
@@ -181,9 +181,9 @@ End
 
 Subroutine getncarray(ncid,varname,arrsize,arrdata)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, intent(in) :: ncid
 Integer, dimension(1:4,1:2), intent(in) :: arrsize
@@ -390,9 +390,9 @@ End
 
 Subroutine ncfinddimlen(ncid,valname,outname,valnum)
 
-Implicit none
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit none
 
 Integer, intent(in) :: ncid
 Character(len=*), intent(in) :: valname
@@ -401,7 +401,7 @@ Integer, intent(out) :: valnum
 Integer ncstatus,valident
 
 Call ncfinddimid(ncid,valname,outname,valident)
-If (outname.EQ.'') Then
+If (outname=='') Then
   !Write(6,*) "WARN: Cannot find dimension ",trim(valname)
   valnum=1
   Return
@@ -409,7 +409,7 @@ End If
 
 ! Find number of elements
 ncstatus = nf_inq_dimlen(ncid,valident,valnum)
-If (ncstatus.NE.nf_noerr) Then
+If (ncstatus/=nf_noerr) Then
   Write(6,*) "ERROR: Cannot determine length of ",trim(valname)," (",ncstatus,")"
   Stop
 End If
@@ -454,9 +454,9 @@ End
 
 Subroutine getncval(ncid,outname,vallab,valnum)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, intent(in) :: ncid,valnum
 Character(len=*), intent(in) :: outname
@@ -470,7 +470,7 @@ Call ncfindvarid(ncid,outname,actname,valident)
 nstart=1
 ncount=valnum
 ncstatus = nf_get_vara_real(ncid,valident,nstart,ncount,vallab)
-If (ncstatus.NE.nf_noerr) Then
+If (ncstatus/=nf_noerr) Then
   Write(6,*) "ERROR: Cannot read ",trim(outname)," data (",ncstatus,")"
   Stop
 End If
@@ -511,9 +511,9 @@ End
 
 Subroutine ncfindvarid(ncid,valname,outname,valident)
 
-Implicit none
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit none
 
 Integer, intent(in) :: ncid
 Character(len=*), intent(in) :: valname
@@ -631,9 +631,9 @@ End
 
 Subroutine ncfinddimid(ncid,valname,outname,valident)
 
-Implicit none
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit none
 
 Integer, intent(in) :: ncid
 Character(len=*), intent(in) :: valname
@@ -656,7 +656,7 @@ varnamelist(3,4)="lvl"
 varnamelist(3,5)="sigma_level"
 
 ncstatus = nf_inq_dimid(ncid,valname,valident)
-If (ncstatus.EQ.nf_noerr) Then
+If (ncstatus==nf_noerr) Then
   outname=valname
   Return
 End if
@@ -667,18 +667,18 @@ i=1
 j=1
 ierr=1
 Do While (ierr.NE.0)
-  If (valname.EQ.varnamelist(i,j)) Then
+  If (valname==varnamelist(i,j)) Then
     ierr=0
   Else
     i=i+1
   End If
   
-  If (i.EQ.5) Then
+  If (i==5) Then
     i=1
     j=j+1
   End If
   
-  If (j.GT.maxname) Then
+  If (j>maxname) Then
     outname=''
     valident=-1
     Return
@@ -686,20 +686,19 @@ Do While (ierr.NE.0)
 
 End Do
 
-
 j=1
 ierr=1
-Do While (ierr.NE.0)
+Do While (ierr/=0)
 
   ncstatus = nf_inq_dimid(ncid,trim(varnamelist(i,j)),valident)
-  If (ncstatus.EQ.nf_noerr) Then
+  If (ncstatus==nf_noerr) Then
     ierr=0
     outname=varnamelist(i,j)
   Else
     j=j+1
   End If
   
-  If (j.GT.maxname) Then
+  If (j>maxname) Then
     ierr=0
     outname=''
     valident=-1
@@ -1157,9 +1156,9 @@ End
 
 Subroutine readtopography(topounit,toponame,ecodim,lonlat,schmidt,dsx,header)
 
-Implicit None
+use netcdf_m
 
-include 'netcdf.inc'
+Implicit None
 
 Integer, intent(in) :: topounit
 Integer, dimension(2), intent(out) :: ecodim
@@ -1171,19 +1170,19 @@ Real, intent(out) :: schmidt,dsx
 real, dimension(1) :: rvals
 
 ierr=nf_open(toponame,nf_nowrite,ncid)
-if (ierr==0) then
+if (ierr==nf_noerr) then
   ierr=nf_get_att_real(ncid,nf_global,'lon0',lonlat(1))
-  if (ierr/=0) then
+  if (ierr/=nf_noerr) then
     write(6,*) "ERROR reading lon0"
     stop
   end if
   ierr=nf_get_att_real(ncid,nf_global,'lat0',lonlat(2))
-  if (ierr/=0) then
+  if (ierr/=nf_noerr) then
     write(6,*) "ERROR reading lat0"
     stop
   end if
   ierr=nf_get_att_real(ncid,nf_global,'schmidt',rvals(1))
-  if (ierr/=0) then
+  if (ierr/=nf_noerr) then
     write(6,*) "ERROR reading schmidt"
     stop
   end if
@@ -1213,9 +1212,9 @@ End
 
 Subroutine gettopols(topounit,toponame,lsmsk,ecodim)
 
-Implicit None
+use netcdf_m
 
-include 'netcdf.inc'
+Implicit None
 
 Integer, intent(in) :: topounit
 Integer, dimension(2), intent(in) :: ecodim
@@ -1264,9 +1263,9 @@ End
 
 Subroutine gettopohgt(topounit,toponame,hgt,lsmsk,ecodim)
 
-Implicit None
+use netcdf_m
 
-include 'netcdf.inc'
+Implicit None
 
 Integer, intent(in) :: topounit
 Integer, dimension(2), intent(in) :: ecodim

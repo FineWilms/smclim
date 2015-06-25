@@ -6,7 +6,7 @@ LDFLAGS =
 OBJT = smclim.o smread.o setxyz_m.o ccinterp.o readswitch.o jimcc_m.o \
        latltoij_m.o ncwrite.o ncread.o xyzinfo_m.o newmpar_m.o \
        indices_m.o parm_m.o precis_m.o ind_m.o jimco_m.o jim_utils.o \
-       nfft_m.o misc.o
+       nfft_m.o misc.o netcdf_m.o
 
 smclim :$(OBJT)
 	$(FF) $(XFLAGS) $(OBJT) $(LDFLAGS) $(LIBS) -o smclim
@@ -24,8 +24,8 @@ clean:
 # Remove mod rule from Modula 2 so GNU make doesn't get confused
 %.o : %.mod
 
-smclim.o : ccinterp.o
-smread.o : ccinterp.o
+smclim.o : ccinterp.o netcdf_m.o
+smread.o : ccinterp.o netcdf_m.o
 ccinterp.o : ccinterp.f90 setxyz_m.o xyzinfo_m.o latltoij_m.o newmpar_m.o precis_m.o
 latltoij_m.o : latltoij_m.f90 xyzinfo_m.o newmpar_m.o precis_m.o
 setxyz_m.o : setxyz_m.f90 newmpar_m.o indices_m.o parm_m.o precis_m.o ind_m.o xyzinfo_m.o jimco_m.o jimcc_m.o 
@@ -39,3 +39,5 @@ jimcc_m.o : jimcc_m.f90 parm_m.o precis_m.o
 jimco_m.o : jimco_m.f90 precis_m.o jim_utils.o nfft_m.o 
 jim_utils.o : jim_utils.f90 precis_m.o 
 nfft_m.o : nfft_m.f90 precis_m.o 
+ncread.o : netcdf_m.o
+ncwrite.o : netcdf_m.o

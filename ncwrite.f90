@@ -22,9 +22,9 @@ end
 
 Subroutine ncinitgen(ncidarr,outfile,dimnum,dimvar,outputunit,adate,latsp)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, dimension(1:3), intent(in) :: dimnum
 Integer, dimension(0:4), intent(out) :: ncidarr
@@ -152,9 +152,9 @@ End
 
 Subroutine ncinitccgen(ncidarr,outfile,dimnum,dimvar,adate,mode)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, dimension(1:3), intent(in) :: dimnum
 Integer, dimension(0:4), intent(out) :: ncidarr
@@ -277,9 +277,9 @@ End
 
 Subroutine ncaddvargen(ncidarr,elemdesc,numtype,numdim,varid,sc,of)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, intent(in) :: numtype,numdim
 Integer, dimension(0:4), intent(in) :: ncidarr
@@ -373,7 +373,7 @@ End If
 
 
 Return
-End
+    End
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! This subroutine defines misc fields in the NetCDF file
@@ -381,9 +381,9 @@ End
 !
 !Subroutine ncaddmisc(ncidarr,elemdesc,numtype,dimtype,varid)
 !
-!Implicit None
+!use netcdf_m
 !
-!Include "netcdf.inc"
+!Implicit None
 !
 !Integer, intent(in) :: numtype,dimtype
 !Integer, dimension(0:4), intent(in) :: ncidarr
@@ -435,9 +435,9 @@ End
 
 Subroutine ncenddef(ncidarr)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, dimension(0:4), intent(in) :: ncidarr
 Integer status
@@ -458,9 +458,9 @@ End
 
 Subroutine nclonlat(ncidarr,dimid,alonlat,alvl,dimnum)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, dimension(0:4), intent(in) :: ncidarr
 Integer, dimension(1:4), intent(in) :: dimid
@@ -485,9 +485,9 @@ End
 
 Subroutine nclonlatgen(ncidarr,dimid,alonlat,alvl,atime,dimnum)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, dimension(0:4), intent(in) :: ncidarr
 Integer, dimension(1:4), intent(in) :: dimid
@@ -509,7 +509,7 @@ Do i=1,2
   End Do
   
   nstart=1
-  status = nf_put_vara_real(ncidarr(0),dimid(i),nstart,dimnum(i),ldata)
+  status = nf_put_vara_real(ncidarr(0),dimid(i),nstart,dimnum(i:i),ldata)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error writing lon and lat data (",status,")"
     Stop
@@ -519,7 +519,7 @@ End Do
 
 If (dimnum(3)/=1) Then
   nstart=1
-  status = nf_put_vara_real(ncidarr(0),dimid(3),nstart,dimnum(3),alvl)
+  status = nf_put_vara_real(ncidarr(0),dimid(3),nstart,dimnum(3:3),alvl)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error writing lvl data (",status,")"
     Stop
@@ -530,10 +530,10 @@ status=nf_inq_vartype(ncidarr(0),dimid(4),vtype)
 select case(vtype)
   case(nf_float)
     nstart=1
-    status = nf_put_vara_real(ncidarr(0),dimid(4),nstart,dimnum(4),atime)
+    status = nf_put_vara_real(ncidarr(0),dimid(4),nstart,dimnum(4:4),atime)
   case(nf_int)
     nstart=1
-    status = nf_put_vara_int(ncidarr(0),dimid(4),nstart,dimnum(4),nint(atime))
+    status = nf_put_vara_int(ncidarr(0),dimid(4),nstart,dimnum(4:4),nint(atime))
   case DEFAULT
     write(6,*) 'ERROR: Unsupported time vartype ',vtype
     stop
@@ -552,9 +552,9 @@ End
 
 Subroutine nclonlatarr(ncidarr,dimid,alonlat,latarr,alvl,atime,dimnum)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, dimension(0:4), intent(in) :: ncidarr
 Integer, dimension(1:4), intent(in) :: dimid
@@ -577,7 +577,7 @@ Do j=1,dimnum(1)
 End Do
 
 nstart=1
-status = nf_put_vara_real(ncidarr(0),dimid(1),nstart,dimnum(1),ldata)
+status = nf_put_vara_real(ncidarr(0),dimid(1),nstart,dimnum(1:1),ldata)
 If (status /= nf_noerr) Then
   Write(6,*) "ERROR: Error writing lon data (",status,")"
   Stop
@@ -585,7 +585,7 @@ End If
 Deallocate(ldata)
 
 nstart=1
-status = nf_put_vara_real(ncidarr(0),dimid(2),nstart,dimnum(2),latarr)
+status = nf_put_vara_real(ncidarr(0),dimid(2),nstart,dimnum(2:2),latarr)
 If (status /= nf_noerr) Then
   Write(6,*) "ERROR: Error writing lat data (",status,")"
   Stop
@@ -593,7 +593,7 @@ End If
 
 If (dimnum(3)/=1) Then
   nstart=1
-  status = nf_put_vara_real(ncidarr(0),dimid(3),nstart,dimnum(3),alvl)
+  status = nf_put_vara_real(ncidarr(0),dimid(3),nstart,dimnum(3:3),alvl)
   If (status /= nf_noerr) Then
     Write(6,*) "ERROR: Error writing lvl data (",status,")"
     Stop
@@ -605,10 +605,10 @@ If (dimnum(4)/=1) Then
   select case(vtype)
     case(nf_float)
       nstart=1
-      status = nf_put_vara_real(ncidarr(0),dimid(4),nstart,dimnum(4),atime)
+      status = nf_put_vara_real(ncidarr(0),dimid(4),nstart,dimnum(4:4),atime)
     case(nf_int)
       nstart=1
-      status = nf_put_vara_int(ncidarr(0),dimid(4),nstart,dimnum(4),nint(atime))
+      status = nf_put_vara_int(ncidarr(0),dimid(4),nstart,dimnum(4:4),nint(atime))
     case DEFAULT
       write(6,*) 'ERROR: Unsupported time vartype ',vtype
       stop
@@ -682,9 +682,9 @@ End
 
 Subroutine ncwritedatgen2(ncidarr,dataout,startpos,dimnum,varid)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, dimension(0:4), intent(in) :: ncidarr
 Integer, intent(in) :: varid
@@ -758,9 +758,9 @@ End
 
 Subroutine ncclose(ncidarr)
 
-Implicit None
+use netcdf_m
 
-Include "netcdf.inc"
+Implicit None
 
 Integer, dimension(0:4), intent(in) :: ncidarr
 Integer status
@@ -834,9 +834,9 @@ End
 
 subroutine ncatt(ncidarr,desc,rval)
 
-implicit none
+use netcdf_m
 
-include 'netcdf.inc'
+implicit none
 
 integer, dimension(0:4), intent(in) :: ncidarr
 integer ncstatus

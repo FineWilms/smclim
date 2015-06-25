@@ -9,10 +9,9 @@
 Subroutine getsmdata(ncid,dataout,lsmask,grid,tlld,ccdim,wlev,lonlat,xyz,axyz,bxyz)
 
 Use ccinterp
+use netcdf_m
 
 Implicit None
-
-Include "netcdf.inc"
 
 integer, intent(in) :: wlev,ncid
 Integer, dimension(1:2), intent(in) :: ccdim
