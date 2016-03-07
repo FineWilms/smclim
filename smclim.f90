@@ -9,7 +9,7 @@ Integer :: nopts
 Character*80, dimension(:,:), allocatable :: options
 
 Write(6,*) 'SMCLIM - interpolate/bin climatology soil moisture/temperature on'
-Write(6,*) '         conformal-cubic grid (MAR-13)'
+Write(6,*) '         conformal-cubic grid (MAR-16)'
 
 ! Read switches
 nopts=3
@@ -205,15 +205,15 @@ dimnum(3:4)=1
 
 ncstatus=nf_redef(ncidarr(0))
 
-ncstatus=nf_def_dim(ncidarr(0),"olev",wlev,olevid)
-If (ncstatus /= nf_noerr) Then
-  if (ncstatus.eq.nf_enameinuse) then
-    write(6,*) "WARN: Dimension olev already exists"
-  else
-    Write(6,*) "ERROR: Error defining dim in NetCDF file (",ncstatus,"): olev"
-    Stop
-  end if
-End If
+!ncstatus=nf_def_dim(ncidarr(0),"olev",wlev,olevid)
+!If (ncstatus /= nf_noerr) Then
+!  if (ncstatus.eq.nf_enameinuse) then
+!    write(6,*) "WARN: Dimension olev already exists"
+!  else
+!    Write(6,*) "ERROR: Error defining dim in NetCDF file (",ncstatus,"): olev"
+!    Stop
+!  end if
+!End If
 
 elemdesc(1)='wetfrac1'
 elemdesc(2)='Wetness fraction layer 1'

@@ -1,7 +1,19 @@
-FF = ifort
-XFLAGS = -O -I $(NETCDF_ROOT)/include -fpp
+
+ifneq ($(CUSTOM),yes)
+FC = ifort
+XFLAGS = -O 
 LIBS = -L $(NETCDF_ROOT)/lib -lnetcdf -lnetcdff
-LDFLAGS = 
+INC = -I $(NETCDF_ROOT)/include
+PPFLAG90 = -fpp
+PPFLAG77 = -fpp
+endif
+
+ifeq ($(GFORTRAN),yes)
+FC = gfortran
+XFLAGS = -O2 -mtune=native -march=native -I $(NETCDF_ROOT)/include
+PPFLAG90 = -x f95-cpp-input
+PPFLAG77 = -x f77-cpp-input
+endif
 
 OBJT = smclim.o smread.o setxyz_m.o ccinterp.o readswitch.o jimcc_m.o \
        latltoij_m.o ncwrite.o ncread.o xyzinfo_m.o newmpar_m.o \
@@ -9,17 +21,17 @@ OBJT = smclim.o smread.o setxyz_m.o ccinterp.o readswitch.o jimcc_m.o \
        nfft_m.o misc.o netcdf_m.o
 
 smclim :$(OBJT)
-	$(FF) $(XFLAGS) $(OBJT) $(LDFLAGS) $(LIBS) -o smclim
+	$(FC) $(XFLAGS) $(OBJT) $(LIBS) -o smclim
 
 clean:
-	rm *.o core *.mod 
+	rm *.o core *.mod smclim
 # This section gives the rules for building object modules.
 
 .SUFFIXES:.f90
 .f90.o:
-	$(FF) -c $(XFLAGS) $<
+	$(FC) -c $(XFLAGS) $(INC) $(PPFLAG90) $<
 .f.o:
-	$(FF) -c $(XFLAGS) $<
+	$(FC) -c $(XFLAGS) $(INC) $(PPFLAG77) $<
 
 # Remove mod rule from Modula 2 so GNU make doesn't get confused
 %.o : %.mod
