@@ -173,7 +173,7 @@ use netcdf_m
 Implicit None
 
 integer, intent(in) :: wlev
-integer olevid
+integer olevid, sndid
 Integer, dimension(1:2), intent(in) :: ccdim
 Integer, dimension(0:4) :: ncidarr
 Integer, dimension(1:4) :: dimnum
@@ -182,7 +182,7 @@ Character(len=*), intent(in) :: outfile
 Character*80, dimension(1:3) :: elemdesc
 Character*80 outname
 character*2 chr
-Real, dimension(1:ccdim(1),1:ccdim(2),1:63+4*wlev), intent(in) :: outdata
+Real, dimension(1:ccdim(1),1:ccdim(2),1:63+4*wlev), intent(inout) :: outdata
 Real, dimension(1:ccdim(1),1:ccdim(2)) :: outdatab
 
 Write(6,*) "Appending data to ",trim(outfile)
@@ -199,6 +199,15 @@ Call ncfinddimid(ncidarr(0),"lon",outname,ncidarr(1))
 Call ncfinddimid(ncidarr(0),"lat",outname,ncidarr(2))
 Call ncfinddimid(ncidarr(0),"lev",outname,ncidarr(3))
 Call ncfinddimid(ncidarr(0),"time",outname,ncidarr(4))
+
+! test for snow depth
+ncstatus = nf_inq_varid(ncidarr(0),"snd",sndid)
+if ( ncstatus==nf_noerr ) then
+  write(6,*) "Snow found in ",trim(outfile)
+  outdata(:,:,31) = 0. ! disable snd
+  outdata(:,:,32) = 0. ! disable smass, ssdn, wbice, snage, isflag
+  outdata(:,:,38) = 0. ! disable tggsn
+end if
 
 dimnum(1:2)=ccdim(1:2)
 dimnum(3:4)=1
